@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
+using System.Threading.Tasks;
 
 namespace Theme_Park_Tracker
 {
@@ -14,218 +15,262 @@ namespace Theme_Park_Tracker
         {
             InitializeComponent();
             PopulateData();
+            LinkForeignElements();
             DisplayLogin(null, null);
         }
 
-        static void PopulateData()
+        static async Task PopulateData()
         {
-            StreamReader sr;
-            string line;
+            List<Task> tasks = new List<Task>();
 
-            // Loads all profile information
+            tasks.Add(Task.Run(async () =>
+            {
+                // Loads all Profile information
 
-            Database.profiles.Clear();
-            if (!File.Exists("Profiles.txt"))
-            {
-                File.WriteAllText("Profiles.txt", "end");
-            }
-            sr = new StreamReader("Profiles.txt");
-            line = sr.ReadLine();
-            while (line != "end")
-            {
-                int id = int.Parse(line);
-                string username = sr.ReadLine();
-                string email = sr.ReadLine();
-                string password = sr.ReadLine();
-                Database.profiles.Add(new Profile(id, username, email, password, false));
-                line = sr.ReadLine();
-            }
-            sr.Close();
-
-            // Loads all park information
-
-            Database.parks.Clear();
-            if (!File.Exists("Parks.txt"))
-            {
-                File.WriteAllText("Parks.txt", "end");
-            }
-            sr = new StreamReader("Parks.txt");
-            line = sr.ReadLine();
-            while (line != "end")
-            {
-                int id = int.Parse(line);
-                string name = sr.ReadLine();
-                Database.parks.Add(new Park(id, name));
-                line = sr.ReadLine();
-            }
-            sr.Close();
-
-            // Loads all the visits information
-
-            Database.visits.Clear();
-            if (!File.Exists("Visits.txt"))
-            {
-                File.WriteAllText("Visits.txt", "end");
-            }
-            sr = new StreamReader("Visits.txt");
-            line = sr.ReadLine();
-            while (line != "end")
-            {
-                int id = int.Parse(line);
-                DateOnly date = DateOnly.Parse("January 01, 1900");
-                try
+                Database.profiles.Clear();
+                if (!File.Exists("Profiles.txt"))
                 {
-                    date = DateOnly.Parse(sr.ReadLine());
+                    File.WriteAllText("Profiles.txt", "end");
                 }
-                catch (Exception ex) { }
-                Profile profile = Database.GetProfileByID(int.Parse(sr.ReadLine()));
-                Park park = Database.GetParkByID(int.Parse(sr.ReadLine()));
-                Database.visits.Add(new Visit(id, date, profile, park));
-                line = sr.ReadLine();
-            }
-            sr.Close();
-
-            // Loads all the manufacturers information
-
-            Database.manufacturers.Clear();
-            if (!File.Exists("Manufacturers.txt"))
-            {
-                File.WriteAllText("Manufacturers.txt", "end");
-            }
-            sr = new StreamReader("Manufacturers.txt");
-            line = sr.ReadLine();
-            while (line != "end")
-            {
-                int id = int.Parse(line);
-                string name = sr.ReadLine();
-                Database.manufacturers.Add(new Manufacturer(id, name));
-                line = sr.ReadLine();
-            }
-            sr.Close();
-
-            // Loads all ride type information
-
-            Database.rideTypes.Clear();
-            if (!File.Exists("RideTypes.txt"))
-            {
-                File.WriteAllText("RideTypes.txt", "end");
-            }
-            sr = new StreamReader("RideTypes.txt");
-            line = sr.ReadLine();
-            while (line != "end")
-            {
-                int id = int.Parse(line);
-                string name = sr.ReadLine();
-                Manufacturer manufacturer = Database.GetManufacturerByID(int.Parse(sr.ReadLine()));
-                Database.rideTypes.Add(new RideType(id, name, manufacturer));
-                line = sr.ReadLine();
-            }
-            sr.Close();
-
-            // Loads all attraction information
-
-            Database.attractions.Clear();
-            if (!File.Exists("Attractions.txt"))
-            {
-                File.WriteAllText("Attractions.txt", "end");
-            }
-            sr = new StreamReader("Attractions.txt");
-            line = sr.ReadLine();
-            while (line != "end")
-            {
-                int id = int.Parse(line);
-                string openingName = sr.ReadLine();
-                DateOnly openingDate = DateOnly.Parse(sr.ReadLine());
-                Park park = Database.GetParkByID(int.Parse(sr.ReadLine()));
-                string rideTypeString = sr.ReadLine();
-                RideType rideType = null;
-                if (rideTypeString != "None")
+                StreamReader sr = new StreamReader("Profiles.txt");
+                string line = await sr.ReadLineAsync();
+                while (line != "end")
                 {
-                    rideType = Database.GetRideTypeByID(int.Parse(rideTypeString));
+                    int id = int.Parse(line);
+                    string username = await sr.ReadLineAsync();
+                    string email = await sr.ReadLineAsync();
+                    string password = await sr.ReadLineAsync();
+                    Database.profiles.Add(new Profile(id, username, email, password, false));
+                    line = await sr.ReadLineAsync();
                 }
+                sr.Close();
+            }));
 
-                Attraction attraction = new FlatRide(id, openingName, openingDate, park, rideType, 1);
-                string[] attractionLine = sr.ReadLine().Split('-');
-                int trackLength, topSpeed, inversions, type;
-                switch (attractionLine[0])
+            tasks.Add(Task.Run(async () =>
+            {
+                // Loads all Park information
+
+                Database.parks.Clear();
+                if (!File.Exists("Parks.txt"))
                 {
-                    case "1":
-                        trackLength = int.Parse(attractionLine[1]);
-                        topSpeed = int.Parse(attractionLine[2]);
-                        inversions = int.Parse(attractionLine[3]);
-                        attraction = new Rollercoaster(id, openingName, openingDate, park, rideType, trackLength, topSpeed, inversions);
-                        break;
-                    case "2":
-                        trackLength = int.Parse(attractionLine[1]);
-                        type = int.Parse(attractionLine[2]);
-                        attraction = new DarkRide(id, openingName, openingDate, park, rideType, trackLength, type);
-                        break;
-                    case "3":
-                        type = int.Parse(attractionLine[1]);
-                        attraction = new FlatRide(id, openingName, openingDate, park, rideType, type);
-                        break;
+                    File.WriteAllText("Parks.txt", "end");
                 }
-
-                Database.attractions.Add(attraction);
-                line = sr.ReadLine();
-            }
-            sr.Close();
-
-            // Loads all attraction rename information
-
-            if (!File.Exists("AttractionRenames.txt"))
-            {
-                File.WriteAllText("AttractionRenames.txt", "end");
-            }
-            sr = new StreamReader("AttractionRenames.txt");
-            line = sr.ReadLine();
-            while (line != "end")
-            {
-                Attraction attraction = Database.GetAttractionByID(int.Parse(line));
-                DateOnly date = DateOnly.Parse("January 01, 1900");
-                try
+                StreamReader sr = new StreamReader("Parks.txt");
+                string line = await sr.ReadLineAsync();
+                while (line != "end")
                 {
-                    date = DateOnly.Parse(sr.ReadLine());
+                    int id = int.Parse(line);
+                    string name = await sr.ReadLineAsync();
+                    Database.parks.Add(new Park(id, name));
+                    line = await sr.ReadLineAsync();
                 }
-                catch (Exception ex) { }
-                string newName = sr.ReadLine();
-                attraction.AddRename(new AttractionRename(date, newName));
-                line = sr.ReadLine();
-            }
-            sr.Close();
+                sr.Close();
+            }));
 
-            // Loads all visit attraction information
+            tasks.Add(Task.Run(async () =>
+            {
+                // Loads all the visits information
 
-            if (!File.Exists("VisitAttractions.txt"))
-            {
-                File.WriteAllText("VisitAttractions.txt", "end");
-            }
-            sr = new StreamReader("VisitAttractions.txt");
-            line = sr.ReadLine();
-            while (line != "end")
-            {
-                Visit visit = Database.GetVisitByID(int.Parse(line));
-                int order = int.Parse(sr.ReadLine());
-                Attraction attraction = Database.GetAttractionByID(int.Parse(sr.ReadLine()));
-                TimeOnly time = TimeOnly.Parse(sr.ReadLine());
-                int waitTime = int.Parse(sr.ReadLine());
-                visit.AddAttraction(new VisitAttraction(attraction, order, time, waitTime));
-                line = sr.ReadLine();
-            }
-            sr.Close();
+                Database.visits.Clear();
+                if (!File.Exists("Visits.txt"))
+                {
+                    File.WriteAllText("Visits.txt", "end");
+                }
+                StreamReader sr = new StreamReader("Visits.txt");
+                string line = await sr.ReadLineAsync();
+                while (line != "end")
+                {
+                    int id = int.Parse(line);
+                    DateOnly date = DateOnly.Parse("January 01, 1900");
+                    try
+                    {
+                        date = DateOnly.Parse(await sr.ReadLineAsync());
+                    }
+                    catch (Exception ex) { }
+                    Profile profile = Database.GetProfileByID(int.Parse(await sr.ReadLineAsync()));
+                    Park park = Database.GetParkByID(int.Parse(await sr.ReadLineAsync()));
+                    Database.visits.Add(new Visit(id, date, profile, park));
+                    line = await sr.ReadLineAsync();
+                }
+                sr.Close();
+            }));
 
-            foreach (Profile profile in Database.profiles)
+            tasks.Add(Task.Run(async () =>
             {
-                profile.SetVisits(Database.GetVisitsByProfileID(profile.GetID()));
-            }
-            foreach (Park park in Database.parks)
+                // Loads all the manufacturers information
+
+                Database.manufacturers.Clear();
+                if (!File.Exists("Manufacturers.txt"))
+                {
+                    File.WriteAllText("Manufacturers.txt", "end");
+                }
+                StreamReader sr = new StreamReader("Manufacturers.txt");
+                string line = await sr.ReadLineAsync();
+                while (line != "end")
+                {
+                    int id = int.Parse(line);
+                    string name = await sr.ReadLineAsync();
+                    Database.manufacturers.Add(new Manufacturer(id, name));
+                    line = await sr.ReadLineAsync();
+                }
+                sr.Close();
+            }));
+
+            tasks.Add(Task.Run(async () =>
             {
-                park.SetAttractions(Database.GetAttractionByPark(park.GetID()));
-            }
-            foreach (Manufacturer manufacturer in Database.manufacturers)
+                // Loads all ride type information
+
+                Database.rideTypes.Clear();
+                if (!File.Exists("RideTypes.txt"))
+                {
+                    File.WriteAllText("RideTypes.txt", "end");
+                }
+                StreamReader sr = new StreamReader("RideTypes.txt");
+                string line = await sr.ReadLineAsync();
+                while (line != "end")
+                {
+                    int id = int.Parse(line);
+                    string name = await sr.ReadLineAsync();
+                    Manufacturer manufacturer = Database.GetManufacturerByID(int.Parse(await sr.ReadLineAsync()));
+                    Database.rideTypes.Add(new RideType(id, name, manufacturer));
+                    line = await sr.ReadLineAsync();
+                }
+                sr.Close();
+            }));
+
+            tasks.Add(Task.Run(async () =>
             {
-                manufacturer.SetRideTypes(Database.GetRideTypesByManufacturerID(manufacturer.GetID()));
-            }
+                // Loads all attraction information
+
+                Database.attractions.Clear();
+                if (!File.Exists("Attractions.txt"))
+                {
+                    File.WriteAllText("Attractions.txt", "end");
+                }
+                StreamReader sr = new StreamReader("Attractions.txt");
+                string line = await sr.ReadLineAsync();
+                while (line != "end")
+                {
+                    int id = int.Parse(line);
+                    string openingName = await sr.ReadLineAsync();
+                    DateOnly openingDate = DateOnly.Parse(await sr.ReadLineAsync());
+                    Park park = Database.GetParkByID(int.Parse(await sr.ReadLineAsync()));
+                    string rideTypeString = await sr.ReadLineAsync();
+                    RideType rideType = null;
+                    if (rideTypeString != "None")
+                    {
+                        rideType = Database.GetRideTypeByID(int.Parse(rideTypeString));
+                    }
+
+                    Attraction attraction = new FlatRide(id, openingName, openingDate, park, rideType, 1);
+                    string[] attractionLine = (await sr.ReadLineAsync()).Split('-');
+                    int trackLength, topSpeed, inversions, type;
+                    switch (attractionLine[0])
+                    {
+                        case "1":
+                            trackLength = int.Parse(attractionLine[1]);
+                            topSpeed = int.Parse(attractionLine[2]);
+                            inversions = int.Parse(attractionLine[3]);
+                            attraction = new Rollercoaster(id, openingName, openingDate, park, rideType, trackLength, topSpeed, inversions);
+                            break;
+                        case "2":
+                            trackLength = int.Parse(attractionLine[1]);
+                            type = int.Parse(attractionLine[2]);
+                            attraction = new DarkRide(id, openingName, openingDate, park, rideType, trackLength, type);
+                            break;
+                        case "3":
+                            type = int.Parse(attractionLine[1]);
+                            attraction = new FlatRide(id, openingName, openingDate, park, rideType, type);
+                            break;
+                    }
+
+                    Database.attractions.Add(attraction);
+                    line = await sr.ReadLineAsync();
+                }
+                sr.Close();
+            }));
+
+            tasks.Add(Task.Run(async () =>
+            {
+                // Loads all attraction rename information
+
+                if (!File.Exists("AttractionRenames.txt"))
+                {
+                    File.WriteAllText("AttractionRenames.txt", "end");
+                }
+                StreamReader sr = new StreamReader("AttractionRenames.txt");
+                string line = await sr.ReadLineAsync();
+                while (line != "end")
+                {
+                    Attraction attraction = Database.GetAttractionByID(int.Parse(line));
+                    DateOnly date = DateOnly.Parse("January 01, 1900");
+                    try
+                    {
+                        date = DateOnly.Parse(await sr.ReadLineAsync());
+                    }
+                    catch (Exception ex) { }
+                    string newName = await sr.ReadLineAsync();
+                    attraction.AddRename(new AttractionRename(date, newName));
+                    line = await sr.ReadLineAsync();
+                }
+                sr.Close();
+            }));
+
+            tasks.Add(Task.Run(async () =>
+            {
+                // Loads all visit attraction information
+
+                if (!File.Exists("VisitAttractions.txt"))
+                {
+                    File.WriteAllText("VisitAttractions.txt", "end");
+                }
+                StreamReader sr = new StreamReader("VisitAttractions.txt");
+                string line = await sr.ReadLineAsync();
+                while (line != "end")
+                {
+                    Visit visit = Database.GetVisitByID(int.Parse(line));
+                    int order = int.Parse(await sr.ReadLineAsync());
+                    Attraction attraction = Database.GetAttractionByID(int.Parse(await sr.ReadLineAsync()));
+                    TimeOnly time = TimeOnly.Parse(await sr.ReadLineAsync());
+                    int waitTime = int.Parse(await sr.ReadLineAsync());
+                    visit.AddAttraction(new VisitAttraction(attraction, order, time, waitTime));
+                    line = await sr.ReadLineAsync();
+                }
+                sr.Close();
+            }));
+
+            await Task.WhenAll(tasks);
+        }
+
+        static async Task LinkForeignElements()
+        {
+            List<Task> tasks = new List<Task>();
+
+            tasks.Add(Task.Run(() =>
+            {
+                foreach (Profile profile in Database.profiles)
+                {
+                    profile.SetVisits(Database.GetVisitsByProfileID(profile.GetID()));
+                }
+            }));
+
+            tasks.Add(Task.Run(() =>
+            {
+                foreach (Park park in Database.parks)
+                {
+                    park.SetAttractions(Database.GetAttractionByPark(park.GetID()));
+                }
+            }));
+
+            tasks.Add(Task.Run(() =>
+            {
+                foreach (Manufacturer manufacturer in Database.manufacturers)
+                {
+                    manufacturer.SetRideTypes(Database.GetRideTypesByManufacturerID(manufacturer.GetID()));
+                }
+            }));
+
+            await Task.WhenAll(tasks);
         }
 
         public void DisplayLogin(object sender, EventArgs e)
