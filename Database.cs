@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading.Tasks;
 
 namespace Theme_Park_Tracker
 {
@@ -22,92 +23,72 @@ namespace Theme_Park_Tracker
         // Getting Profile data
         public static Profile GetProfileByID(int id)
         {
-            IEnumerable<Profile> selectedProfileIEnumerable = profiles.Where(profile => profile.GetID() == id);
-            List<Profile> selectedProfile = selectedProfileIEnumerable.ToList();
-            return selectedProfile[0];
+            Profile selectedProfile = profiles.AsParallel().Where(profile => profile.GetID() == id).FirstOrDefault();
+            return selectedProfile;
         }
         public static Profile GetProfileByUsername(string username)
         {
-            IEnumerable<Profile> selectedProfileIEnumerable = profiles.Where(profile => profile.GetUsername() == username);
-            List<Profile> selectedProfile = selectedProfileIEnumerable.ToList();
-            if (selectedProfile.Count > 0)
-            {
-                return selectedProfile[0];
-            }
-            return null;
+            Profile selectedProfile = profiles.AsParallel().Where(profile => profile.GetUsername() == username).FirstOrDefault();
+            return selectedProfile;
         }
         public static Profile GetProfileByEmail(string email)
         {
-            IEnumerable<Profile> selectedProfileIEnumerable = profiles.Where(profile => profile.GetEmail() == email);
-            List<Profile > selectedProfile = selectedProfileIEnumerable.ToList();
-            if (selectedProfile.Count > 0)
-            {
-                return selectedProfile[0];
-            }
-            return null;
+            Profile selectedProfile = profiles.AsParallel().Where(profile => profile.GetEmail() == email).FirstOrDefault();
+            return selectedProfile;
         }
 
         // Getting Park data
         public static Park GetParkByID(int id)
         {
-            IEnumerable<Park> selectedParkIEnumerable = parks.Where(park => park.GetID() == id);
-            List<Park> selectedPark= selectedParkIEnumerable.ToList();
-            return selectedPark[0];
+            Park selectedPark = parks.AsParallel().Where(park => park.GetID() == id).FirstOrDefault();
+            return selectedPark;
         }
 
         // Getting Visit data
         public static Visit GetVisitByID(int id)
         {
-            IEnumerable<Visit> selectedVisitIEnumerable = visits.Where(visit => visit.GetID() == id);
-            List<Visit> selectedVisit = selectedVisitIEnumerable.ToList();
-            return selectedVisit[0];
+            Visit selectedVisit = visits.AsParallel().Where(visit => visit.GetID() == id).FirstOrDefault();
+            return selectedVisit;
         }
         public static List<Visit> GetVisitsByProfileID(int id)
         {
-            IEnumerable<Visit> selectedVisitsIEnumerable = visits.Where(visit => visit.GetProfile().GetID() == id);
-            List<Visit> selectedVisits = selectedVisitsIEnumerable.ToList();
+            List<Visit> selectedVisits = visits.AsParallel().Where(visit => visit.GetID() == id).ToList();
             return selectedVisits;
         }
         public static List<Visit> GetVisitsByParkID(int id)
         {
-            IEnumerable<Visit> selectedVisitsIEnumerable = visits.Where(visit => visit.GetPark().GetID() == id);
-            List<Visit> selectedVisits = selectedVisitsIEnumerable.ToList();
+            List<Visit> selectedVisits = visits.AsParallel().Where(visit => visit.GetPark().GetID() == id).ToList();
             return selectedVisits;
         }
         
         // Getting Manufacturer data
         public static Manufacturer GetManufacturerByID(int id)
         {
-            IEnumerable<Manufacturer> selectedManufacturerIEnumerable = manufacturers.Where(manufacturer => manufacturer.GetID() == id);
-            List<Manufacturer> selectedManufacturer = selectedManufacturerIEnumerable.ToList();
-            return selectedManufacturer[0];
+            Manufacturer selectedManufacturer = manufacturers.AsParallel().Where(manufacturer => manufacturer.GetID() == id).FirstOrDefault();
+            return selectedManufacturer;
         }
 
         // Getting RideType data
         public static RideType GetRideTypeByID(int id)
         {
-            IEnumerable<RideType> selectedRideTypeIEnumerable = rideTypes.Where(rideType => rideType.GetID() == id);
-            List<RideType> selectedRideType = selectedRideTypeIEnumerable.ToList();
-            return selectedRideType[0];
+            RideType selectedRideType = rideTypes.AsParallel().Where(rideType => rideType.GetID() == id).FirstOrDefault();
+            return selectedRideType;
         }
         public static List<RideType> GetRideTypesByManufacturerID(int id)
         {
-            IEnumerable<RideType> selectedRideTypesIEnumerable = rideTypes.Where(rideType => rideType.GetManufacturer().GetID() == id);
-            List<RideType> selectedRideTypes = selectedRideTypesIEnumerable.ToList();
+            List<RideType> selectedRideTypes = rideTypes.AsParallel().Where(rideType => rideType.GetManufacturer().GetID() == id).ToList();
             return selectedRideTypes;
         }
 
         // Getting Attraction data
         public static Attraction GetAttractionByID(int id)
         {
-            IEnumerable<Attraction> selectedAttractionIEnumerable = attractions.Where(attraction => attraction.GetID() == id);
-            List<Attraction> selectedAttraction = selectedAttractionIEnumerable.ToList();
-            return selectedAttraction[0];
+            Attraction selectedAttraction = attractions.AsParallel().Where(attraction => attraction.GetID() == id).FirstOrDefault();
+            return selectedAttraction;
         }
         public static List<Attraction> GetAttractionByPark(int id)
         {
-            IEnumerable<Attraction> selectedAttractionsIEnumerable = attractions.Where(attraction => attraction.GetPark().GetID() == id);
-            List<Attraction> selectedAttractions = selectedAttractionsIEnumerable.ToList();
+            List<Attraction> selectedAttractions = attractions.AsParallel().Where(attraction => attraction.GetPark().GetID() == id).ToList();
             return selectedAttractions;
         }
 
@@ -130,101 +111,127 @@ namespace Theme_Park_Tracker
         }
 
         // Writing data to the file
-        public static void SaveData()
+        public static async Task SaveData()
         {
-            StreamWriter sw;
+            List<Task> tasks = new List<Task>();
 
-            sw = new StreamWriter("Profiles.txt");
-            foreach (Profile profile in profiles)
+            tasks.Add(Task.Run(async () =>
             {
-                sw.WriteLine($"{profile.GetID()}\n{profile.GetUsername()}\n{profile.GetEmail()}\n{profile.GetPassword()}");
-            }
-            sw.WriteLine("end");
-            sw.Close();
-
-            sw = new StreamWriter("Parks.txt");
-            foreach (Park park in parks)
-            {
-                sw.WriteLine($"{park.GetID()}\n{park.GetName()}");
-            }
-            sw.WriteLine("end");
-            sw.Close();
-
-            sw = new StreamWriter("Visits.txt");
-            foreach (Visit visit in visits)
-            {
-                sw.WriteLine($"{visit.GetID()}\n{visit.GetDate()}\n{visit.GetProfile().GetID()}\n{visit.GetPark().GetID()}");
-            }
-            sw.WriteLine("end");
-            sw.Close();
-
-            sw = new StreamWriter("Manufacturers.txt");
-            foreach (Manufacturer manufacturer in manufacturers)
-            {
-                sw.WriteLine($"{manufacturer.GetID()}\n{manufacturer.GetName()}");
-            }
-            sw.WriteLine("end");
-            sw.Close();
-
-            sw = new StreamWriter("RideTypes.txt");
-            foreach (RideType rideType in rideTypes)
-            {
-                sw.WriteLine($"{rideType.GetID()}\n{rideType.GetName()}\n{rideType.GetManufacturer().GetID()}");
-            }
-            sw.WriteLine("end");
-            sw.Close();
-
-            sw = new StreamWriter("Attractions.txt");
-            foreach (Attraction attraction in attractions)
-            {
-                string rideType = "None";
-                if (attraction.GetRideType() != null)
+                StreamWriter sw = new StreamWriter("Profiles.txt");
+                foreach (Profile profile in profiles)
                 {
-                    rideType = attraction.GetRideType().GetID().ToString();
+                    await sw.WriteLineAsync($"{profile.GetID()}\n{profile.GetUsername()}\n{profile.GetEmail()}\n{profile.GetPassword()}");
                 }
-                sw.WriteLine($"{attraction.GetID()}\n{attraction.GetOpeningName()}\n{attraction.GetOpeningDate()}\n{attraction.GetPark().GetID()}\n{rideType}");
-                List<string> elements = attraction.GetElements();
-                switch (elements[0])
-                {
-                    case "1":
-                        Rollercoaster rollercoaster = (Rollercoaster)attraction;
-                        sw.WriteLine($"1-{rollercoaster.GetTrackLength()}-{rollercoaster.GetTopSpeed()}-{rollercoaster.GetInversions()}");
-                        break;
-                    case "2":
-                        DarkRide darkRide = (DarkRide)attraction;
-                        sw.WriteLine($"2-{darkRide.GetTrackLength()}-{darkRide.GetTypeNum()}");
-                        break;
-                    case "3":
-                        FlatRide flatRide = (FlatRide)attraction;
-                        sw.WriteLine($"3-{flatRide.GetTypeNum()}");
-                        break;
+                await sw.WriteLineAsync("end");
+                sw.Close();
+            }));
 
-                }
-            }
-            sw.WriteLine("end");
-            sw.Close();
-
-            sw = new StreamWriter("AttractionRenames.txt");
-            foreach (Attraction attraction in attractions)
+            tasks.Add(Task.Run(async () =>
             {
-                foreach (AttractionRename rename in attraction.GetRenames())
+                StreamWriter sw = new StreamWriter("Parks.txt");
+                foreach (Park park in parks)
                 {
-                    sw.WriteLine($"{attraction.GetID()}\n{rename.GetDate()}\n{rename.GetName()}");
+                    await sw.WriteLineAsync($"{park.GetID()}\n{park.GetName()}");
                 }
-            }
-            sw.WriteLine("end");
-            sw.Close();
+                await sw.WriteLineAsync("end");
+                sw.Close();
+            }));
 
-            sw = new StreamWriter("VisitAttractions.txt");
-            foreach (Visit visit in visits)
+            tasks.Add(Task.Run(async () =>
             {
-                foreach (VisitAttraction attraction in visit.GetAttractions())
+                StreamWriter sw = new StreamWriter("Visits.txt");
+                foreach (Visit visit in visits)
                 {
-                    sw.WriteLine($"{visit.GetID()}\n{attraction.GetOrder()}\n{attraction.GetAttraction().GetID()}\n{attraction.GetTime()}\n{attraction.GetWaitTime()}");
+                    await sw.WriteLineAsync($"{visit.GetID()}\n{visit.GetDate()}\n{visit.GetProfile().GetID()}\n{visit.GetPark().GetID()}");
                 }
-            }
-            sw.WriteLine("end");
-            sw.Close();
+                await sw.WriteLineAsync("end");
+                sw.Close();
+            }));
+
+            tasks.Add(Task.Run(async () =>
+            {
+                StreamWriter sw = new StreamWriter("Manufacturers.txt");
+                foreach (Manufacturer manufacturer in manufacturers)
+                {
+                    await sw.WriteLineAsync($"{manufacturer.GetID()}\n{manufacturer.GetName()}");
+                }
+                await sw.WriteLineAsync("end");
+                sw.Close();
+            }));
+
+            tasks.Add(Task.Run(async () =>
+            {
+                StreamWriter sw = new StreamWriter("RideTypes.txt");
+                foreach (RideType rideType in rideTypes)
+                {
+                    await sw.WriteLineAsync($"{rideType.GetID()}\n{rideType.GetName()}\n{rideType.GetManufacturer().GetID()}");
+                }
+                await sw.WriteLineAsync("end");
+                sw.Close();
+            }));
+
+            tasks.Add(Task.Run(async () =>
+            {
+                StreamWriter sw = new StreamWriter("Attractions.txt");
+                foreach (Attraction attraction in attractions)
+                {
+                    string rideType = "None";
+                    if (attraction.GetRideType() != null)
+                    {
+                        rideType = attraction.GetRideType().GetID().ToString();
+                    }
+                    await sw.WriteLineAsync($"{attraction.GetID()}\n{attraction.GetOpeningName()}\n{attraction.GetOpeningDate()}\n{attraction.GetPark().GetID()}\n{rideType}");
+                    List<string> elements = attraction.GetElements();
+                    switch (elements[0])
+                    {
+                        case "1":
+                            Rollercoaster rollercoaster = (Rollercoaster)attraction;
+                            await sw.WriteLineAsync($"1-{rollercoaster.GetTrackLength()}-{rollercoaster.GetTopSpeed()}-{rollercoaster.GetInversions()}");
+                            break;
+                        case "2":
+                            DarkRide darkRide = (DarkRide)attraction;
+                            await sw.WriteLineAsync($"2-{darkRide.GetTrackLength()}-{darkRide.GetTypeNum()}");
+                            break;
+                        case "3":
+                            FlatRide flatRide = (FlatRide)attraction;
+                            await sw.WriteLineAsync($"3-{flatRide.GetTypeNum()}");
+                            break;
+
+                    }
+                }
+                await sw.WriteLineAsync("end");
+                sw.Close();
+            }));
+
+            tasks.Add(Task.Run(async () =>
+            {
+                StreamWriter sw = new StreamWriter("AttractionRenames.txt");
+                foreach (Attraction attraction in attractions)
+                {
+                    foreach (AttractionRename rename in attraction.GetRenames())
+                    {
+                        await sw.WriteLineAsync($"{attraction.GetID()}\n{rename.GetDate()}\n{rename.GetName()}");
+                    }
+                }
+                await sw.WriteLineAsync("end");
+                sw.Close();
+            }));
+
+            tasks.Add(Task.Run(async () =>
+            {
+                StreamWriter sw = new StreamWriter("VisitAttractions.txt");
+                foreach (Visit visit in visits)
+                {
+                    foreach (VisitAttraction attraction in visit.GetAttractions())
+                    {
+                        await sw.WriteLineAsync($"{visit.GetID()}\n{attraction.GetOrder()}\n{attraction.GetAttraction().GetID()}\n{attraction.GetTime()}\n{attraction.GetWaitTime()}");
+                    }
+                }
+                await sw.WriteLineAsync("end");
+                sw.Close();
+            }));
+
+            await Task.WhenAll(tasks);
         }
 
         static public int GetNextVisitID()

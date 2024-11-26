@@ -14,16 +14,22 @@ namespace Theme_Park_Tracker
         public Form1()
         {
             InitializeComponent();
-            PopulateData();
-            LinkForeignElements();
-            DisplayLogin(null, null);
+            InitializeDataAsync();
         }
 
-        static async Task PopulateData()
+        private async void InitializeDataAsync()
         {
-            List<Task> tasks = new List<Task>();
+            await ReadFiles();
+            await LinkForeignElements();
+            DisplayLogin(null, null);
+        }
+        static async Task ReadFiles()
+        {
+            List<Task> tasks1 = new List<Task>();
+            List<Task> tasks2 = new List<Task>();
+            List<Task> tasks3 = new List<Task>();
 
-            tasks.Add(Task.Run(async () =>
+            tasks1.Add(Task.Run(async () =>
             {
                 // Loads all Profile information
 
@@ -46,7 +52,7 @@ namespace Theme_Park_Tracker
                 sr.Close();
             }));
 
-            tasks.Add(Task.Run(async () =>
+            tasks1.Add(Task.Run(async () =>
             {
                 // Loads all Park information
 
@@ -67,7 +73,30 @@ namespace Theme_Park_Tracker
                 sr.Close();
             }));
 
-            tasks.Add(Task.Run(async () =>
+            tasks1.Add(Task.Run(async () =>
+            {
+                // Loads all the manufacturers information
+
+                Database.manufacturers.Clear();
+                if (!File.Exists("Manufacturers.txt"))
+                {
+                    File.WriteAllText("Manufacturers.txt", "end");
+                }
+                StreamReader sr = new StreamReader("Manufacturers.txt");
+                string line = await sr.ReadLineAsync();
+                while (line != "end")
+                {
+                    int id = int.Parse(line);
+                    string name = await sr.ReadLineAsync();
+                    Database.manufacturers.Add(new Manufacturer(id, name));
+                    line = await sr.ReadLineAsync();
+                }
+                sr.Close();
+            }));
+
+            await Task.WhenAll(tasks1);
+
+            tasks2.Add(Task.Run(async () =>
             {
                 // Loads all the visits information
 
@@ -95,28 +124,7 @@ namespace Theme_Park_Tracker
                 sr.Close();
             }));
 
-            tasks.Add(Task.Run(async () =>
-            {
-                // Loads all the manufacturers information
-
-                Database.manufacturers.Clear();
-                if (!File.Exists("Manufacturers.txt"))
-                {
-                    File.WriteAllText("Manufacturers.txt", "end");
-                }
-                StreamReader sr = new StreamReader("Manufacturers.txt");
-                string line = await sr.ReadLineAsync();
-                while (line != "end")
-                {
-                    int id = int.Parse(line);
-                    string name = await sr.ReadLineAsync();
-                    Database.manufacturers.Add(new Manufacturer(id, name));
-                    line = await sr.ReadLineAsync();
-                }
-                sr.Close();
-            }));
-
-            tasks.Add(Task.Run(async () =>
+            tasks2.Add(Task.Run(async () =>
             {
                 // Loads all ride type information
 
@@ -138,7 +146,7 @@ namespace Theme_Park_Tracker
                 sr.Close();
             }));
 
-            tasks.Add(Task.Run(async () =>
+            tasks2.Add(Task.Run(async () =>
             {
                 // Loads all attraction information
 
@@ -190,7 +198,9 @@ namespace Theme_Park_Tracker
                 sr.Close();
             }));
 
-            tasks.Add(Task.Run(async () =>
+            await Task.WhenAll(tasks2);
+
+            tasks3.Add(Task.Run(async () =>
             {
                 // Loads all attraction rename information
 
@@ -216,7 +226,7 @@ namespace Theme_Park_Tracker
                 sr.Close();
             }));
 
-            tasks.Add(Task.Run(async () =>
+            tasks3.Add(Task.Run(async () =>
             {
                 // Loads all visit attraction information
 
@@ -239,9 +249,8 @@ namespace Theme_Park_Tracker
                 sr.Close();
             }));
 
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(tasks3);
         }
-
         static async Task LinkForeignElements()
         {
             List<Task> tasks = new List<Task>();
@@ -463,10 +472,13 @@ namespace Theme_Park_Tracker
                         }
                         else
                         {
-                            Profile profile = new Profile(Database.GetNextProfileID(), username, email, password1, true);
-                            Database.profiles.Add(profile);
-                            Database.profile = profile;
-                            LoadFeed();
+                            if (Database.VerifyInfo(username, email, password1))
+                            {
+                                Profile profile = new Profile(Database.GetNextProfileID(), username, email, password1, true);
+                                Database.profiles.Add(profile);
+                                Database.profile = profile;
+                                LoadFeed();
+                            }
                         }
                     }
                 }
@@ -2513,7 +2525,10 @@ namespace Theme_Park_Tracker
 
         private void rideTypesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            LoadRideTypes();
+            if (Database.profile != null)
+            {
+                LoadRideTypes();
+            }
         }
         public void LoadRideTypes()
         {
