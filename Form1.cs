@@ -1094,34 +1094,17 @@ namespace Theme_Park_Tracker
                 catch { }
             }
 
-            Button button = new Button();
-            button.Text = "Edit Park";
-            button.Location = new Point(1120, 14);
-            button.Size = new Size(70, 30);
-            button.Tag = park;
-            button.Click += EditPark;
-            ViewPanel.Controls.Add(button);
+            // Edit Park button
+            ViewPanel.Controls.Add(CreateButton("Edit Park", new Point(1120, 14), EditPark, park));
 
-            Label label = new Label();
-            label.Text = park.GetName(); ;
-            label.Location = new Point(14, 14);
-            label.Font = new Font("Arial", 20, FontStyle.Bold);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // Displays Park name
+            ViewPanel.Controls.Add(CreateLabel(park.GetName(), new Point(14, 14), 20, FontStyle.Bold, null, null));
 
-            label = new Label();
-            label.Text = $"Total Rides: {(park.GetAttractions() == null ? "0" : park.GetAttractions().Count)}";
-            label.Location = new Point(400, 18);
-            label.Font = new Font("Arial", 15, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // Total ride count
+            ViewPanel.Controls.Add(CreateLabel($"Total Rides: {(park.GetAttractions() == null ? "0" : park.GetAttractions().Count)}", new Point(400, 18), 15, FontStyle.Regular, null, null));
 
-            label = new Label();
-            label.Text = "Rides";
-            label.Location = new Point(14, 65);
-            label.Font = new Font("Arial", 15, FontStyle.Bold);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // "Rides" text
+            ViewPanel.Controls.Add(CreateLabel("Rides", new Point(14, 65), 15, FontStyle.Bold, null, null));
 
             int location = 92;
 
@@ -1131,36 +1114,22 @@ namespace Theme_Park_Tracker
 
                 foreach (Attraction attraction in attractions)
                 {
-                    label = new Label();
-                    label.Text = $"{attraction.GetName(DateOnly.FromDateTime(DateTime.Now))}";
-                    label.Location = new Point(14, location);
-                    label.Font = new Font("Arial", 13, FontStyle.Regular);
-                    label.Tag = attraction;
-                    label.Click += ViewRideClicked;
-                    label.Cursor = Cursors.Hand;
-                    label.AutoSize = true;
-                    ViewPanel.Controls.Add(label);
+                    // Displays Attraction name
+                    ViewPanel.Controls.Add(CreateLabel($"{attraction.GetName(DateOnly.FromDateTime(DateTime.Now))}", new Point(14, location), 13, FontStyle.Regular, ViewRideClicked, attraction));
 
                     if (location != 92)
                     {
-                        label = new Label();
-                        label.BorderStyle = BorderStyle.FixedSingle;
-                        label.Size = new Size(1186, 1);
-                        label.Location = new Point(14, location - 5);
-                        ViewPanel.Controls.Add(label);
+                        // Partition between Attractions
+                        ViewPanel.Controls.Add(CreatePartition(location - 5));
                     }
 
-                    label = new Label();
-                    label.Text = $"{(attraction.GetElements()[0] == "1" ? "Rollercoaster" : $"{(attraction.GetElements()[0] == "3" ? "Flat Ride" : "Dark Ride")}")}";
-                    label.Location = new Point(300, location + 2);
-                    label.Font = new Font("Arial", 10, FontStyle.Regular);
-                    label.AutoSize = true;
-                    ViewPanel.Controls.Add(label);
+                    // Ride type
+                    ViewPanel.Controls.Add(CreateLabel($"{(attraction.GetElements()[0] == "1" ? "Rollercoaster" : $"{(attraction.GetElements()[0] == "3" ? "Flat Ride" : "Dark Ride")}")}", new Point(300, location + 2), 10, FontStyle.Regular, null, null));
 
                     location += 30;
                 }
             }
-        } // Next Rework
+        }
         public void NewPark(object sender, EventArgs e)
         {
             Park park = new Park(Database.GetNextParkID(), "");
@@ -1176,48 +1145,22 @@ namespace Theme_Park_Tracker
             Button clickedButton = (Button)sender;
             Park park = (Park)clickedButton.Tag;
 
-            Button button = new Button();
-            button.Text = "Save park";
-            button.Location = new Point(1120, 14);
-            button.Size = new Size(70, 30);
-            button.Tag = park;
-            button.Click += SavePark;
-            ViewPanel.Controls.Add(button);
+            // Save Park button
+            ViewPanel.Controls.Add(CreateButton("Save park", new Point(1120, 14), SavePark, park));
 
-            button = new Button();
-            button.Text = "Delete park";
-            button.Location = new Point(1110, 610);
-            button.Size = new Size(80, 30);
-            button.Tag = park;
-            button.Click += DeletePark;
-            ViewPanel.Controls.Add(button);
+            // Delete Park button
+            ViewPanel.Controls.Add(CreateButton("Delete park", new Point(1120, 14), DeletePark, park));
 
-            Label label = new Label();
-            label.Text = "Name:";
-            label.Location = new Point(14, 14);
-            label.Font = new Font("Arial", 10, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // "Name" text
+            ViewPanel.Controls.Add(CreateLabel("Name:", new Point(14, 14), 10, FontStyle.Regular, null, null));
 
-            TextBox textBox = new TextBox();
-            textBox.Location = new Point(65, 12);
-            textBox.Width = 200;
-            ViewPanel.Controls.Add(textBox);
-
-            if (park != null)
-            {
-                textBox.Text = park.GetName();
-            }
+            // Park name field
+            ViewPanel.Controls.Add(CreateTextBox($"{(park == null ? "" : park.GetName())}", new Point(65, 12), 200, false));
 
             if (Database.parks.Contains(park))
             {
-                button = new Button();
-                button.Text = "New attraction";
-                button.Location = new Point(14, 50);
-                button.AutoSize = true;
-                button.Tag = park;
-                button.Click += NewRide;
-                ViewPanel.Controls.Add(button);
+                // New Attraction Button
+                ViewPanel.Controls.Add(CreateButton("New attraction", new Point(14, 50), NewRide, park));
 
                 int location = 80;
 
@@ -1229,32 +1172,19 @@ namespace Theme_Park_Tracker
                     panel.Location = new Point(14, location);
                     ViewPanel.Controls.Add(panel);
 
-                    label = new Label();
-                    label.Text = attraction.GetName(DateOnly.FromDateTime(DateTime.Now));
-                    label.Location = new Point(9, 9);
-                    label.Font = new Font("Arial", 10, FontStyle.Bold);
-                    label.AutoSize = true;
-                    label.Tag = attraction;
-                    panel.Controls.Add(label);
+                    // Display Attraction name
+                    panel.Controls.Add(CreateLabel(attraction.GetName(DateOnly.FromDateTime(DateTime.Now)), new Point(9, 9), 10, FontStyle.Bold, null, attraction));
 
-                    button = new Button();
-                    button.Text = "Delete";
-                    button.Location = new Point(820, 5);
-                    button.Tag = new Tuple<Park, Attraction>(park, attraction);
-                    button.Click += RemoveRideFromPark;
-                    button.Size = new Size(75, 25);
-                    panel.Controls.Add(button);
+                    // Delete Attraction button
+                    panel.Controls.Add(CreateButton("Delete", new Point(820, 5), RemoveRideFromPark, new Tuple<Park, Attraction>(park, attraction)));
 
                     location += 40;
                 }
             }
             else
             {
-                label = new Label();
-                label.Text = "Please save park before adding attractions";
-                label.Location = new Point(14, 50);
-                label.AutoSize = true;
-                ViewPanel.Controls.Add(label);
+                // Instruction to save park before adding attractions
+                ViewPanel.Controls.Add(CreateLabel("Please save park before adding attractions", new Point(14, 50), 9, FontStyle.Regular, null, null));
             }
         }
         public void SavePark(object sender, EventArgs e)
@@ -1326,12 +1256,8 @@ namespace Theme_Park_Tracker
         {
             ViewPanel.Controls.Clear();
 
-            Button button = new Button();
-            button.Text = "New Manufacturer";
-            button.Location = new Point(14, 14);
-            button.Size = new Size(120, 30);
-            button.Click += NewManufacturer;
-            ViewPanel.Controls.Add(button);
+            // New Manufacturer button
+            ViewPanel.Controls.Add(CreateButton("New Manufacturer", new Point(14, 14), NewManufacturer, null));
 
             if (Database.manufacturers.Count != 0)
             {
@@ -1339,31 +1265,17 @@ namespace Theme_Park_Tracker
 
                 foreach (Manufacturer manufacturer in Database.manufacturers)
                 {
-                    Label label = new Label();
-                    label.Text = manufacturer.GetName();
-                    label.Location = new Point(14, location);
-                    label.Font = new Font("Arial", 20, FontStyle.Regular);
-                    label.AutoSize = true;
-                    label.Tag = manufacturer;
-                    label.Click += ViewManufacturerClicked;
-                    label.Cursor = Cursors.Hand;
-                    ViewPanel.Controls.Add(label);
+                    // Displays Manufacturer name
+                    ViewPanel.Controls.Add(CreateLabel(manufacturer.GetName(), new Point(14, location), 20, FontStyle.Regular, ViewManufacturerClicked, manufacturer));
 
-                    label = new Label();
+                    // Manufacturers RideType count
                     int manufacturerModels = Database.GetRideTypesByManufacturerID(manufacturer.GetID()).Count;
-                    label.Text = $"{manufacturerModels} model{(manufacturerModels == 1 ? "" : "s")} tracked";
-                    label.Location = new Point(1085, location + 8);
-                    label.Font = new Font("Arial", 10, FontStyle.Regular);
-                    label.AutoSize = true;
-                    ViewPanel.Controls.Add(label);
+                    ViewPanel.Controls.Add(CreateLabel($"{manufacturerModels} model{(manufacturerModels == 1 ? "" : "s")} tracked", new Point(1085, location + 8), 10, FontStyle.Regular, null, null));
 
                     if (location != 74)
                     {
-                        label = new Label();
-                        label.BorderStyle = BorderStyle.FixedSingle;
-                        label.Size = new Size(1186, 1);
-                        label.Location = new Point(14, location - 10);
-                        ViewPanel.Controls.Add(label);
+                        // Partition between Manufacturers
+                        ViewPanel.Controls.Add(CreatePartition(location - 10));
                     }
 
                     location += 50;
@@ -1371,12 +1283,8 @@ namespace Theme_Park_Tracker
             }
             else
             {
-                Label label = new Label();
-                label.Text = "No Manufacturers to display. Click 'New Manufacturer' to get started!";
-                label.Location = new Point(50, 317);
-                label.Font = new Font("Arial", 10, FontStyle.Regular);
-                label.AutoSize = true;
-                ViewPanel.Controls.Add(label);
+                // No activity message
+                ViewPanel.Controls.Add(CreateLabel("No Manufacturers to display. Click 'New Manufacturer' to get started!", new Point(50, 317), 10, FontStyle.Regular, null, null));
             }
 
         }
@@ -1401,34 +1309,17 @@ namespace Theme_Park_Tracker
                 catch { }
             }
 
-            Button button = new Button();
-            button.Text = "Edit Manufacturer";
-            button.Location = new Point(1100, 14);
-            button.Size = new Size(110, 30);
-            button.Tag = manufacturer;
-            button.Click += EditManufacturer;
-            ViewPanel.Controls.Add(button);
+            // Edit Manufacturer button
+            ViewPanel.Controls.Add(CreateButton("Edit Manufacturer", new Point(1100, 14), EditManufacturer, manufacturer));
 
-            Label label = new Label();
-            label.Text = manufacturer.GetName(); ;
-            label.Location = new Point(14, 14);
-            label.Font = new Font("Arial", 20, FontStyle.Bold);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // Manufacturers name
+            ViewPanel.Controls.Add(CreateLabel(manufacturer.GetName(), new Point(14, 14), 20, FontStyle.Bold, null, null));
 
-            label = new Label();
-            label.Text = $"Total Models: {(manufacturer.GetRideTypes() == null ? "0" : manufacturer.GetRideTypes().Count)}";
-            label.Location = new Point(400, 18);
-            label.Font = new Font("Arial", 15, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // Manufacturers RideType count
+            ViewPanel.Controls.Add(CreateLabel($"Total Models: {(manufacturer.GetRideTypes() == null ? "0" : manufacturer.GetRideTypes().Count)}", new Point(400, 18), 15, FontStyle.Regular, null, null));
 
-            label = new Label();
-            label.Text = "Models";
-            label.Location = new Point(14, 65);
-            label.Font = new Font("Arial", 15, FontStyle.Bold);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // "Models" text
+            ViewPanel.Controls.Add(CreateLabel("Models", new Point(14, 65), 15, FontStyle.Bold, null, null));
 
             int location = 92;
 
@@ -1438,23 +1329,13 @@ namespace Theme_Park_Tracker
 
                 foreach (RideType rideType in rideTypes)
                 {
-                    label = new Label();
-                    label.Text = $"{rideType.GetName()}";
-                    label.Location = new Point(14, location);
-                    label.Font = new Font("Arial", 13, FontStyle.Regular);
-                    label.Tag = rideType;
-                    label.Click += ViewRideTypeClicked;
-                    label.Cursor = Cursors.Hand;
-                    label.AutoSize = true;
-                    ViewPanel.Controls.Add(label);
+                    // RideType name
+                    ViewPanel.Controls.Add(CreateLabel($"{rideType.GetName()}", new Point(14, location), 13, FontStyle.Regular, ViewRideTypeClicked, rideType));
 
                     if (location != 92)
                     {
-                        label = new Label();
-                        label.BorderStyle = BorderStyle.FixedSingle;
-                        label.Size = new Size(1186, 1);
-                        label.Location = new Point(14, location - 5);
-                        ViewPanel.Controls.Add(label);
+                        // Partition between RideTypes
+                        ViewPanel.Controls.Add(CreatePartition(location - 5));
                     }
 
                     location += 30;
@@ -1476,48 +1357,22 @@ namespace Theme_Park_Tracker
             Button clickedButton = (Button)sender;
             Manufacturer manufacturer = (Manufacturer)clickedButton.Tag;
 
-            Button button = new Button();
-            button.Text = "Save manufacturer";
-            button.Location = new Point(1070, 14);
-            button.Size = new Size(120, 30);
-            button.Tag = manufacturer;
-            button.Click += SaveManufacturer;
-            ViewPanel.Controls.Add(button);
+            // Save Manufacturer
+            ViewPanel.Controls.Add(CreateButton("Save manufacturer", new Point(1070, 14), SaveManufacturer, manufacturer));
 
-            button = new Button();
-            button.Text = "Delete manufacturer";
-            button.Location = new Point(1060, 610);
-            button.Size = new Size(130, 30);
-            button.Tag = manufacturer;
-            button.Click += DeleteManufacturer;
-            ViewPanel.Controls.Add(button);
+            // Delete Manufacturer
+            ViewPanel.Controls.Add(CreateButton("Delete manufacturer", new Point(1070, 14), DeleteManufacturer, manufacturer));
 
-            Label label = new Label();
-            label.Text = "Name:";
-            label.Location = new Point(14, 14);
-            label.Font = new Font("Arial", 10, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // "Name" text
+            ViewPanel.Controls.Add(CreateLabel("Name:", new Point(14, 14), 10, FontStyle.Regular, null, null));
 
-            TextBox textBox = new TextBox();
-            textBox.Location = new Point(65, 12);
-            textBox.Width = 200;
-            ViewPanel.Controls.Add(textBox);
-
-            if (manufacturer != null)
-            {
-                textBox.Text = manufacturer.GetName();
-            }
+            // Manufacturer name field
+            ViewPanel.Controls.Add(CreateTextBox($"{(manufacturer == null ? "" : manufacturer.GetName())}", new Point(65, 12), 200, false));
 
             if (Database.manufacturers.Contains(manufacturer))
             {
-                button = new Button();
-                button.Text = "New ride type";
-                button.Location = new Point(14, 50);
-                button.AutoSize = true;
-                button.Tag = manufacturer;
-                button.Click += NewRideType;
-                ViewPanel.Controls.Add(button);
+                // "New ride type" text
+                ViewPanel.Controls.Add(CreateButton("New ride type", new Point(14, 50), NewRideType, manufacturer));
 
                 int location = 80;
 
@@ -1529,21 +1384,11 @@ namespace Theme_Park_Tracker
                     panel.Location = new Point(14, location);
                     ViewPanel.Controls.Add(panel);
 
-                    label = new Label();
-                    label.Text = rideType.GetName();
-                    label.Location = new Point(9, 9);
-                    label.Font = new Font("Arial", 10, FontStyle.Bold);
-                    label.AutoSize = true;
-                    label.Tag = rideType;
-                    panel.Controls.Add(label);
+                    // RideType name
+                    panel.Controls.Add(CreateLabel(rideType.GetName(), new Point(9, 9), 10, FontStyle.Bold, null, rideType));
 
-                    button = new Button();
-                    button.Text = "Delete";
-                    button.Location = new Point(820, 5);
-                    button.Tag = new Tuple<Manufacturer, RideType>(manufacturer, rideType);
-                    button.Click += RemoveRideTypeFromManufacturer;
-                    button.Size = new Size(75, 25);
-                    panel.Controls.Add(button);
+                    // Removes RideType from Manufacturer
+                    panel.Controls.Add(CreateButton("Delete", new Point(820, 5), RemoveRideTypeFromManufacturer, new Tuple<Manufacturer, RideType>(manufacturer, rideType)));
 
                     location += 40;
                 }
@@ -1618,7 +1463,7 @@ namespace Theme_Park_Tracker
             sender = (object)button;
             EditManufacturer(sender, e);
         }
-
+        // Done
         private void ridesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (Database.profile != null)
@@ -1659,23 +1504,13 @@ namespace Theme_Park_Tracker
 
                 foreach (Attraction attraction in attractions)
                 {
-                    Label label = new Label();
-                    label.Text = $"{attraction.GetName(DateOnly.FromDateTime(DateTime.Now))} - {attraction.GetPark().GetName()}";
-                    label.Location = new Point(14, location);
-                    label.Font = new Font("Arial", 20, FontStyle.Regular);
-                    label.AutoSize = true;
-                    label.Tag = attraction;
-                    label.Click += ViewRideClicked;
-                    label.Cursor = Cursors.Hand;
-                    ViewPanel.Controls.Add(label);
+                    // Attraction name
+                    ViewPanel.Controls.Add(CreateLabel($"{attraction.GetName(DateOnly.FromDateTime(DateTime.Now))} - {attraction.GetPark().GetName()}", new Point(14, location), 20, FontStyle.Regular, ViewRideClicked, attraction));
 
                     if (location != 14)
                     {
-                        label = new Label();
-                        label.BorderStyle = BorderStyle.FixedSingle;
-                        label.Size = new Size(1186, 1);
-                        label.Location = new Point(14, location - 10);
-                        ViewPanel.Controls.Add(label);
+                        // Partition between Attractions
+                        ViewPanel.Controls.Add(CreatePartition(location - 10));
                     }
 
                     location += 50;
@@ -1685,21 +1520,13 @@ namespace Theme_Park_Tracker
             {
                 if (Database.parks.Count != 0)
                 {
-                    Label label = new Label();
-                    label.Text = "No Rides to display. Got to a park and click 'New Ride' to get started!";
-                    label.Location = new Point(50, 317);
-                    label.Font = new Font("Arial", 10, FontStyle.Regular);
-                    label.AutoSize = true;
-                    ViewPanel.Controls.Add(label);
+                    // No activity message when no rides
+                    ViewPanel.Controls.Add(CreateLabel("No Rides to display. Got to a park and click 'New Ride' to get started!", new Point(50, 317), 10, FontStyle.Regular, null, null));
                 }
                 else
                 {
-                    Label label = new Label();
-                    label.Text = "No Rides to display. Click 'New Park' and then add a ride to get started!";
-                    label.Location = new Point(50, 317);
-                    label.Font = new Font("Arial", 10, FontStyle.Regular);
-                    label.AutoSize = true;
-                    ViewPanel.Controls.Add(label);
+                    // No activity message when no park
+                    ViewPanel.Controls.Add(CreateLabel("No Rides to display. Click 'New Park' and then add a ride to get started!", new Point(50, 317), 10, FontStyle.Regular, null, null));
                 }
             }
         }
@@ -1725,20 +1552,11 @@ namespace Theme_Park_Tracker
                 catch { }
             }
 
-            Button button = new Button();
-            button.Text = "Edit attraction";
-            button.Location = new Point(1110, 14);
-            button.Size = new Size(100, 30);
-            button.Tag = attraction;
-            button.Click += EditRide;
-            ViewPanel.Controls.Add(button);
+            // Edit Attraction button
+            ViewPanel.Controls.Add(CreateButton("Edit attraction", new Point(1110, 14), EditRide, attraction));
 
-            Label label = new Label();
-            label.Text = attraction.GetName(DateOnly.FromDateTime(DateTime.Now));
-            label.Location = new Point(14, 14);
-            label.Font = new Font("Arial", 20, FontStyle.Bold);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // Attraction name
+            ViewPanel.Controls.Add(CreateLabel(attraction.GetName(DateOnly.FromDateTime(DateTime.Now)), new Point(14, 14), 20, FontStyle.Bold, null, null));
         }
         public void NewRide(object sender, EventArgs e)
         {
@@ -1755,46 +1573,22 @@ namespace Theme_Park_Tracker
             Button clickedButton = (Button)sender;
             Attraction attraction = (Attraction)clickedButton.Tag;
 
-            Button button = new Button();
-            button.Text = "Save ride";
-            button.Location = new Point(1100, 14);
-            button.Size = new Size(90, 30);
-            button.Tag = attraction;
-            button.Click += SaveRide;
-            ViewPanel.Controls.Add(button);
+            // Save Attraction button
+            ViewPanel.Controls.Add(CreateButton("Save ride", new Point(1100, 14), SaveRide, attraction));
 
-            button = new Button();
-            button.Text = "Delete ride";
-            button.Location = new Point(1110, 610);
-            button.Size = new Size(80, 30);
-            button.Tag = attraction;
-            button.Click += DeleteRide;
-            ViewPanel.Controls.Add(button);
+            // Save Attraction button
+            ViewPanel.Controls.Add(CreateButton("Delete ride", new Point(1100, 14), DeleteRide, attraction));
 
-            Label label = new Label();
-            label.Text = "Name:";
-            label.Location = new Point(14, 14);
-            label.Font = new Font("Arial", 10, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // "Name" text
+            ViewPanel.Controls.Add(CreateLabel("Name:", new Point(14, 14), 10, FontStyle.Regular, null, null));
 
-            TextBox textBox = new TextBox();
-            textBox.Location = new Point(115, 12);
-            textBox.Width = 200;
-            ViewPanel.Controls.Add(textBox);
+            // Name field
+            ViewPanel.Controls.Add(CreateTextBox($"{(attraction == null ? "" : attraction.GetName(DateOnly.FromDateTime(DateTime.Now)))}", new Point(115, 12), 200, false));
 
-            if (attraction != null)
-            {
-                textBox.Text = attraction.GetName(DateOnly.FromDateTime(DateTime.Now));
-            }
+            // "Ride Model" text
+            ViewPanel.Controls.Add(CreateLabel("Ride Model:", new Point(14, 35), 10, FontStyle.Regular, null, null));
 
-            label = new Label();
-            label.Text = "Ride Model:";
-            label.Location = new Point(14, 35);
-            label.Font = new Font("Arial", 10, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
-
+            // Ride Model ComboBox
             ComboBox comboBox = new ComboBox();
             Database.rideTypes.OrderBy(rideType => rideType.GetName());
             Database.rideTypes.OrderBy(rideType => rideType.GetManufacturer().GetName());
@@ -1816,13 +1610,10 @@ namespace Theme_Park_Tracker
             comboBox.Size = new Size(200, 10);
             ViewPanel.Controls.Add(comboBox);
 
-            label = new Label();
-            label.Text = "Ride Type:";
-            label.Location = new Point(14, 56);
-            label.Font = new Font("Arial", 10, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // "Ride Type" label
+            ViewPanel.Controls.Add(CreateLabel("Ride Type:", new Point(14, 56), 10, FontStyle.Regular, null, null));
 
+            // Ride Type ComboBox
             comboBox = new ComboBox();
             comboBox.Items.Add("Rollercoaster");
             comboBox.Items.Add("Flat Ride");
@@ -1832,41 +1623,19 @@ namespace Theme_Park_Tracker
             comboBox.Tag = attraction;
             ViewPanel.Controls.Add(comboBox);
 
-            if (attraction != null)
-            {
-                string type = attraction.GetElements()[0];
-                if (type == "1")
-                {
-                    comboBox.SelectedIndex = 0;
-                }
-                else if (type == "3")
-                {
-                    comboBox.SelectedIndex = 1;
-                }
-                else if (type == "2")
-                {
-                    comboBox.SelectedIndex = 2;
-                }
-            }
+            if (attraction != null) comboBox.SelectedIndex = int.Parse(attraction.GetElements()[0]) - 1;
             comboBox.SelectedIndexChanged += TypeChanged;
 
-            label = new Label();
-            label.Text = "Opening Date:";
-            label.Location = new Point(14, 77);
-            label.Font = new Font("Arial", 10, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // "Opening Date" text
+            ViewPanel.Controls.Add(CreateLabel("Opening Date:", new Point(14, 77), 10, FontStyle.Regular, null, null));
 
+            // Opening Date
             DateTimePicker timePicker = new DateTimePicker();
             timePicker.Location = new Point(115, 75);
             ViewPanel.Controls.Add(timePicker);
 
-            button = new Button();
-            button.Text = "Add Rename";
-            button.Location = new Point(14, 124);
-            button.Size = new Size(90, 30); ;
-            button.Click += RenameClicked;
-            ViewPanel.Controls.Add(button);
+            // Add Rename button
+            ViewPanel.Controls.Add(CreateButton("Add Rename", new Point(14, 124), RenameClicked, null));
 
             foreach (AttractionRename rename in attraction.GetRenames())
             {
@@ -1951,6 +1720,7 @@ namespace Theme_Park_Tracker
             switch (attraction.GetElements()[0])
             {
                 case "1":
+                    ViewPanel.Controls.Add(CreateLabel("Track Length (metres):", new Point(500, 25), 10, FontStyle.Regular, null, null));
                     label = new Label();
                     label.Text = "Track Length (metres):";
                     label.Location = new Point(500, 25);
