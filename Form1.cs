@@ -286,51 +286,26 @@ namespace Theme_Park_Tracker
         {
             ViewPanel.Controls.Clear();
 
-            Label label = new Label();
-            label.Text = "Login";
-            label.Location = new Point(90, 130);
-            label.Font = new Font("Arial", 40, FontStyle.Bold);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // "Login" text
+            ViewPanel.Controls.Add(CreateLabel("Login", new Point(90, 130), 40, FontStyle.Bold, null, null));
 
-            label = new Label();
-            label.Text = "Username:";
-            label.Location = new Point(100, 230);
-            label.Font = new Font("Arial", 15, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // "Username" text
+            ViewPanel.Controls.Add(CreateLabel("Username:", new Point(100, 230), 15, FontStyle.Regular, null, null));
 
-            label = new Label();
-            label.Text = "Password:";
-            label.Location = new Point(100, 275);
-            label.Font = new Font("Arial", 15, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // "Password" text
+            ViewPanel.Controls.Add(CreateLabel("Password:", new Point(100, 275), 15, FontStyle.Regular, null, null));
 
-            TextBox textBox1 = new TextBox();
-            textBox1.Location = new Point(210, 230);
-            textBox1.Width = 200;
-            ViewPanel.Controls.Add(textBox1);
+            // Username field
+            ViewPanel.Controls.Add(CreateTextBox(null, new Point(210, 230), 200, false));
 
-            TextBox textBox2 = new TextBox();
-            textBox2.Location = new Point(210, 275);
-            textBox2.Width = 200;
-            textBox2.UseSystemPasswordChar = true;
-            ViewPanel.Controls.Add(textBox2);
+            // Password field
+            ViewPanel.Controls.Add(CreateTextBox(null, new Point(210, 275), 200, true));
 
-            Button button = new Button();
-            button.Text = "Login";
-            button.Location = new Point(180, 320);
-            button.Size = new Size(125, 25);
-            button.Click += LogInClicked;
-            ViewPanel.Controls.Add(button);
+            // Login button
+            ViewPanel.Controls.Add(CreateButton("Login", new Point(205, 320), LogInClicked, null));
 
-            label = new Label();
-            label.Text = "Create an account";
-            label.Location = new Point(190, 360);
-            label.AutoSize = true;
-            label.Click += DisplayCreateAccount;
-            ViewPanel.Controls.Add(label);
+            // Sign Up route
+            ViewPanel.Controls.Add(CreateLabel("Create an account", new Point(190, 360), 9, FontStyle.Regular, DisplayCreateAccount, null));
         }
         public void LogInClicked(object sender, EventArgs e)
         {
@@ -363,76 +338,38 @@ namespace Theme_Park_Tracker
         {
             ViewPanel.Controls.Clear();
 
-            Label label = new Label();
-            label.Text = "Sign Up";
-            label.Location = new Point(90, 130);
-            label.Font = new Font("Arial", 40, FontStyle.Bold);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // "Sign Up" text
+            ViewPanel.Controls.Add(CreateLabel("Sign Up:", new Point(90, 130), 40, FontStyle.Bold, null, null));
 
-            label = new Label();
-            label.Text = "Username:";
-            label.Location = new Point(100, 230);
-            label.Font = new Font("Arial", 15, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // "Username" text
+            ViewPanel.Controls.Add(CreateLabel("Username:", new Point(100, 230), 15, FontStyle.Regular, null, null));
 
-            label = new Label();
-            label.Text = "Email:";
-            label.Location = new Point(100, 275);
-            label.Font = new Font("Arial", 15, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // "Email" text
+            ViewPanel.Controls.Add(CreateLabel("Email:", new Point(100, 275), 15, FontStyle.Regular, null, null));
 
-            label = new Label();
-            label.Text = "Password:";
-            label.Location = new Point(100, 320);
-            label.Font = new Font("Arial", 15, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // "Password" text
+            ViewPanel.Controls.Add(CreateLabel("Password:", new Point(100, 320), 15, FontStyle.Regular, null, null));
 
-            label = new Label();
-            label.Text = "Password:";
-            label.Location = new Point(100, 365);
-            label.Font = new Font("Arial", 15, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // "Password" text for confirm password
+            ViewPanel.Controls.Add(CreateLabel("Password:", new Point(100, 365), 15, FontStyle.Regular, null, null));
 
-            TextBox textBox = new TextBox();
-            textBox.Location = new Point(210, 230);
-            textBox.Width = 200;
-            ViewPanel.Controls.Add(textBox);
+            // Username Field
+            ViewPanel.Controls.Add(CreateTextBox(null, new Point(210, 230), 200, false));
 
-            textBox = new TextBox();
-            textBox.Location = new Point(210, 275);
-            textBox.Width = 200;
-            ViewPanel.Controls.Add(textBox);
+            // Email Field
+            ViewPanel.Controls.Add(CreateTextBox(null, new Point(210, 275), 200, false));
 
-            textBox = new TextBox();
-            textBox.Location = new Point(210, 320);
-            textBox.Width = 200;
-            textBox.UseSystemPasswordChar = true;
-            ViewPanel.Controls.Add(textBox);
+            // Password Field
+            ViewPanel.Controls.Add(CreateTextBox(null, new Point(210, 320), 200, true));
 
-            textBox = new TextBox();
-            textBox.Location = new Point(210, 365);
-            textBox.Width = 200;
-            textBox.UseSystemPasswordChar = true;
-            ViewPanel.Controls.Add(textBox);
+            // Password Field for confirm password
+            ViewPanel.Controls.Add(CreateTextBox(null, new Point(210, 365), 200, true));
 
-            Button button = new Button();
-            button.Text = "Sign up";
-            button.Location = new Point(180, 410);
-            button.Size = new Size(125, 25);
-            button.Click += SignUpClicked;
-            ViewPanel.Controls.Add(button);
+            // Sign Up Button
+            ViewPanel.Controls.Add(CreateButton("Sign Up", new Point(205, 410), SignUpClicked, null));
 
-            label = new Label();
-            label.Text = "Login";
-            label.Location = new Point(225, 450);
-            label.AutoSize = true;
-            label.Click += DisplayLogin;
-            ViewPanel.Controls.Add(label);
+            // Login route
+            ViewPanel.Controls.Add(CreateLabel("Login", new Point(223, 450), 9, FontStyle.Regular, DisplayLogin, null));
         }
         public void SignUpClicked(object sender, EventArgs e)
         {
@@ -496,92 +433,48 @@ namespace Theme_Park_Tracker
         {
             ViewPanel.Controls.Clear();
 
-            Label label = new Label();
-            label.Text = Database.profile.GetUsername();
-            label.Location = new Point(12, 10);
-            label.Font = new Font("Arial", 30, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            List<TextBox> textBoxes = new List<TextBox>();
 
-            Button button = new Button();
-            button.Text = "Delete Profile";
-            button.Location = new Point(1110, 610);
-            button.Size = new Size(80, 30);
-            button.Click += DeleteProfile;
-            ViewPanel.Controls.Add(button);
+            // Displays username at top of page
+            ViewPanel.Controls.Add(CreateLabel(Database.profile.GetUsername(), new Point(12, 10), 30, FontStyle.Regular, null, null));
 
-            label = new Label();
-            label.Text = "Username:";
-            label.Location = new Point(14, 80);
-            label.Font = new Font("Arial", 15, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // Button to delete Profile
+            ViewPanel.Controls.Add(CreateButton("Delete Profile", new Point(1110, 610), DeleteProfile, null));
 
-            TextBox textBox1 = new TextBox();
-            textBox1.Text = Database.profile.GetUsername();
-            textBox1.Location = new Point(130, 82);
-            textBox1.Width = 200;
-            ViewPanel.Controls.Add(textBox1);
+            // "Username" text
+            ViewPanel.Controls.Add(CreateLabel("Username:", new Point(14, 80), 15, FontStyle.Regular, null, null));
 
-            label = new Label();
-            label.Text = "Email:";
-            label.Location = new Point(14, 110);
-            label.Font = new Font("Arial", 15, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // Username field
+            textBoxes.Add(CreateTextBox(Database.profile.GetUsername(), new Point(130, 82), 200, false));
+            ViewPanel.Controls.Add(textBoxes[0]);
 
-            TextBox textBox2 = new TextBox();
-            textBox2.Text = Database.profile.GetEmail();
-            textBox2.Location = new Point(130, 112);
-            textBox2.Width = 200;
-            ViewPanel.Controls.Add(textBox2);
+            // "Email" text
+            ViewPanel.Controls.Add(CreateLabel("Email:", new Point(14, 110), 15, FontStyle.Regular, null, null));
 
-            label = new Label();
-            label.Text = "Password:";
-            label.Location = new Point(14, 140);
-            label.Font = new Font("Arial", 15, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // Email field
+            textBoxes.Add(CreateTextBox(Database.profile.GetEmail(), new Point(130, 112), 200, false));
+            ViewPanel.Controls.Add(textBoxes[1]);
 
-            TextBox textBox3 = new TextBox();
-            textBox3.Location = new Point(130, 142);
-            textBox3.Width = 200;
-            textBox3.UseSystemPasswordChar = true;
-            ViewPanel.Controls.Add(textBox3);
+            // "Password" text
+            ViewPanel.Controls.Add(CreateLabel("Password:", new Point(14, 140), 15, FontStyle.Regular, null, null));
 
-            button = new Button();
-            button.Text = "Update";
-            button.Location = new Point(110, 180);
-            button.Size = new Size(80, 30);
-            button.Tag = new List<TextBox>() { textBox1, textBox2, textBox3 };
-            button.Click += UpdateButtonClicked;
-            ViewPanel.Controls.Add(button);
+            // Password field
+            textBoxes.Add(CreateTextBox(null, new Point(130, 142), 200, true));
+            ViewPanel.Controls.Add(textBoxes[2]);
 
-            label = new Label();
-            label.Text = "Other Users";
-            label.Location = new Point(14, 230);
-            label.Font = new Font("Arial", 15, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // Update info button
+            ViewPanel.Controls.Add(CreateButton("Update", new Point(110, 180), UpdateButtonClicked, textBoxes));
+
+            // "Other Users" label for list of other users
+            ViewPanel.Controls.Add(CreateLabel("Other Users", new Point(14, 230), 15, FontStyle.Regular, null, null));
 
             int location = 260;
             foreach (Profile profile in Database.profiles)
             {
                 if (profile != Database.profile)
                 {
-                    label = new Label();
-                    label.Text = profile.GetUsername();
-                    label.Location = new Point(14, location);
-                    label.Font = new Font("Arial", 10, FontStyle.Regular);
-                    label.AutoSize = true;
-                    label.Tag = profile;
-                    label.Click += ViewProfileClicked;
-                    label.Cursor = Cursors.Hand;
-                    ViewPanel.Controls.Add(label);
-
-                    ToolTip toolTip = new ToolTip();
-                    toolTip.SetToolTip(label, "Open profiles visits");
-
+                    // Display other users name
+                    ViewPanel.Controls.Add(CreateLabel(profile.GetUsername(), new Point(14, location), 10, FontStyle.Regular, ViewProfileClicked, profile));
                     location += 20;
                 }
             }
@@ -632,12 +525,8 @@ namespace Theme_Park_Tracker
         {
             ViewPanel.Controls.Clear();
 
-            Label label = new Label();
-            label.Text = "Hello, " + Database.profile.GetUsername();
-            label.Location = new Point(14, 10);
-            label.Font = new Font("Arial", 30, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // Display hello message
+            ViewPanel.Controls.Add(CreateLabel($"Hello, {Database.profile.GetUsername()}", new Point(14, 10), 30, FontStyle.Regular, null, null));
 
             IEnumerable<Visit> otherVisits = Database.visits.Where(visit => Database.profile.CheckIfDidVisit(visit) == false);
 
@@ -646,34 +535,19 @@ namespace Theme_Park_Tracker
                 int location = 90;
                 foreach (Visit visit in otherVisits)
                 {
-                    label = new Label();
-                    label.Text = $"{visit.GetProfile().GetUsername()} visited {visit.GetPark().GetName()} on {visit.GetDate().ToString()}";
-                    label.Location = new Point(20, location);
-                    label.Font = new Font("Arial", 15, FontStyle.Regular);
-                    label.AutoSize = true;
-                    ViewPanel.Controls.Add(label);
+                    // Visitor and park
+                    ViewPanel.Controls.Add(CreateLabel($"{visit.GetProfile().GetUsername()} visited {visit.GetPark().GetName()} on {visit.GetDate()}", new Point(20, location), 15, FontStyle.Regular, null, null));
 
-                    location += 25;
+                    // Visit activity
+                    ViewPanel.Controls.Add(CreateLabel($"They got on {visit.GetAttractionCount()} ride{(visit.GetAttractionCount() == 1 ? "" : "s")}", new Point(20, location + 25), 10, FontStyle.Regular, null, null));
 
-                    label = new Label();
-                    int visitRides = visit.GetAttractionCount();
-                    label.Text = $"They got on {visitRides} ride{(visitRides == 1 ? "" : "s")}";
-                    label.Location = new Point(20, location);
-                    label.Font = new Font("Arial", 10, FontStyle.Regular);
-                    label.AutoSize = true;
-                    ViewPanel.Controls.Add(label);
-
-                    location += 40;
+                    location += 65;
                 }
             }
             else
             {
-                label = new Label();
-                label.Text = "No activity from other users!";
-                label.Location = new Point(50, 317);
-                label.Font = new Font("Arial", 10, FontStyle.Regular);
-                label.AutoSize = true;
-                ViewPanel.Controls.Add(label);
+                // No activity message
+                ViewPanel.Controls.Add(CreateLabel("No activity from other users!", new Point(50, 317), 10, FontStyle.Regular, null, null));
             }
         }
 
@@ -692,12 +566,8 @@ namespace Theme_Park_Tracker
 
             if (edit)
             {
-                Button button = new Button();
-                button.Text = "New Visit";
-                button.Location = new Point(14, 14);
-                button.Size = new Size(100, 30);
-                button.Click += NewVisit;
-                ViewPanel.Controls.Add(button);
+                // New Visit button
+                ViewPanel.Controls.Add(CreateButton("New Visit", new Point(14, 14), NewVisit, null));
 
                 location = 74;
             }
@@ -706,31 +576,17 @@ namespace Theme_Park_Tracker
             {
                 foreach (Visit visit in profile.GetVisits())
                 {
-                    Label label = new Label();
-                    label.Text = $"{visit.GetPark().GetName()} - {visit.GetDate()}";
-                    label.Location = new Point(14, location);
-                    label.Font = new Font("Arial", 20, FontStyle.Regular);
-                    label.AutoSize = true;
+                    // Visit info with view route
                     Tuple<Visit, bool> tuple = Tuple.Create(visit, edit);
-                    label.Tag = tuple;
-                    label.Click += ViewVisitClicked;
-                    label.Cursor = Cursors.Hand;
-                    ViewPanel.Controls.Add(label);
+                    ViewPanel.Controls.Add(CreateLabel($"{visit.GetPark().GetName()} - {visit.GetDate()}", new Point(14, location), 20, FontStyle.Regular, ViewVisitClicked, tuple));
 
-                    label = new Label();
-                    label.Text = $"-- {visit.GetAttractionCount()} Ride{(visit.GetAttractionCount() == 1 ? "" : "s")} -- {visit.GetUniqueAttractionCount()} Unique Ride{(visit.GetUniqueAttractionCount() == 1 ? "" : "s")} --";
-                    label.Location = new Point(1000, location + 8);
-                    label.Font = new Font("Arial", 10, FontStyle.Regular);
-                    label.AutoSize = true;
-                    ViewPanel.Controls.Add(label);
+                    // Visit summary
+                    ViewPanel.Controls.Add(CreateLabel($"-- {visit.GetAttractionCount()} Ride{(visit.GetAttractionCount() == 1 ? "" : "s")} -- {visit.GetUniqueAttractionCount()} Unique Ride{(visit.GetUniqueAttractionCount() == 1 ? "" : "s")} --", new Point(1000, location + 8), 10, FontStyle.Regular, null, null));
 
                     if (location != 14 && location != 74)
                     {
-                        label = new Label();
-                        label.BorderStyle = BorderStyle.FixedSingle;
-                        label.Size = new Size(1186, 1);
-                        label.Location = new Point(14, location - 10);
-                        ViewPanel.Controls.Add(label);
+                        // Partition between Visits
+                        ViewPanel.Controls.Add(CreatePartition(location - 10));
                     }
 
                     location += 50;
@@ -740,21 +596,13 @@ namespace Theme_Park_Tracker
             {
                 if (profile == Database.profile)
                 {
-                    Label label = new Label();
-                    label.Text = "No Visits to display. Click 'New Visit' to get started!";
-                    label.Location = new Point(50, 317);
-                    label.Font = new Font("Arial", 10, FontStyle.Regular);
-                    label.AutoSize = true;
-                    ViewPanel.Controls.Add(label);
+                    // No activity message for user
+                    ViewPanel.Controls.Add(CreateLabel("No Visits to display. Click 'New Visit' to get started!", new Point(50, 317), 10, FontStyle.Regular, null, null));
                 }
                 else
                 {
-                    Label label = new Label();
-                    label.Text = "This user doesn't have any visits yet!";
-                    label.Location = new Point(50, 317);
-                    label.Font = new Font("Arial", 10, FontStyle.Regular);
-                    label.AutoSize = true;
-                    ViewPanel.Controls.Add(label);
+                    // No activity message for other user
+                    ViewPanel.Controls.Add(CreateLabel("This user doesn't have any visits yet!", new Point(50, 317), 10, FontStyle.Regular, null, null));
                 }
             }
         }
@@ -784,103 +632,56 @@ namespace Theme_Park_Tracker
                 catch { }
             }
 
+            Label label;
+
             if (edit)
             {
-                Button button = new Button();
-                button.Text = "Edit visit";
-                button.Location = new Point(1120, 14);
-                button.Size = new Size(70, 30);
-                button.Tag = visit;
-                button.Click += EditVisit;
-                ViewPanel.Controls.Add(button);
+                // Button to edit visit details
+                ViewPanel.Controls.Add(CreateButton("Edit visit", new Point(1120, 14), EditVisit, visit));
             }
 
-            Label label = new Label();
-            label.Text = visit.GetPark().GetName();
-            label.Location = new Point(14, 14);
-            label.Font = new Font("Arial", 20, FontStyle.Bold);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // Park name
+            ViewPanel.Controls.Add(CreateLabel(visit.GetPark().GetName(), new Point(14, 14), 20, FontStyle.Bold, null, null));
 
-            label = new Label();
-            label.Text = visit.GetDate().ToString();
-            label.Location = new Point(14, 43);
-            label.Font = new Font("Arial", 15, FontStyle.Bold);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // Visit date
+            ViewPanel.Controls.Add(CreateLabel(visit.GetDate().ToString(), new Point(14, 43), 15, FontStyle.Bold, null, null));
 
-            label = new Label();
-            label.Text = $"{visit.GetProfile().GetUsername()}'s visit";
-            label.Location = new Point(14, 65);
-            label.Font = new Font("Arial", 15, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // Visitor name
+            ViewPanel.Controls.Add(CreateLabel($"{visit.GetProfile().GetUsername()}'s visit", new Point(14, 65), 15, FontStyle.Regular, null, null));
 
-            label = new Label();
-            label.Text = "Rides";
-            label.Location = new Point(14, 103);
-            label.Font = new Font("Arial", 15, FontStyle.Bold);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // "Rides" text
+            ViewPanel.Controls.Add(CreateLabel("Rides", new Point(14, 103), 15, FontStyle.Bold, null, null));
 
-            label = new Label();
-            label.Text = $"Unique Rides: {visit.GetUniqueAttractionCount()}";
-            label.Location = new Point(300, 25);
-            label.Font = new Font("Arial", 15, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // Unique Rides count
+            ViewPanel.Controls.Add(CreateLabel($"Unique Rides: {visit.GetUniqueAttractionCount()}", new Point(300, 25), 15, FontStyle.Regular, null, null));
 
-            label = new Label();
-            label.Text = $"Total Rides: {visit.GetAttractionCount()}";
-            label.Location = new Point(300, 50);
-            label.Font = new Font("Arial", 15, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
-
-            List<VisitAttraction> attractions = visit.GetAttractions().OrderBy(attraction => attraction.GetOrder()).ToList();
+            // Total Rides count
+            ViewPanel.Controls.Add(CreateLabel($"Total Rides: {visit.GetAttractionCount()}", new Point(300, 50), 15, FontStyle.Regular, null, null));
 
             int location = 130;
-            foreach (VisitAttraction attraction in attractions)
+            foreach (VisitAttraction attraction in visit.GetAttractions().OrderBy(attraction => attraction.GetOrder()).ToList())
             {
-                label = new Label();
-                label.Text = $"{attraction.GetOrder()}. {attraction.GetAttraction().GetName(visit.GetDate())}";
-                label.Location = new Point(14, location);
-                label.Font = new Font("Arial", 13, FontStyle.Regular);
-                label.Tag = attraction;
-                label.Click += ViewRideClicked;
-                label.Cursor = Cursors.Hand;
-                label.AutoSize = true;
-                ViewPanel.Controls.Add(label);
+                // Ride order and name
+                ViewPanel.Controls.Add(CreateLabel($"{attraction.GetOrder()}. {attraction.GetAttraction().GetName(visit.GetDate())}", new Point(14, location), 13, FontStyle.Regular, ViewRideClicked, attraction.GetAttraction()));
 
                 if (location != 130)
                 {
-                    label = new Label();
-                    label.BorderStyle = BorderStyle.FixedSingle;
-                    label.Size = new Size(1186, 1);
-                    label.Location = new Point(14, location - 5);
-                    ViewPanel.Controls.Add(label);
+                    // Partition between Rides
+                    ViewPanel.Controls.Add(CreatePartition(location - 10));
                 }
                 int waitTime = attraction.GetWaitTime();
                 int hours = waitTime / 60, minutes = waitTime % 60;
                 if (waitTime != -1)
                 {
-                    label = new Label();
-                    label.Text = $"Wait Time: {(hours != 0 ? $"{hours} hour{(hours == 1 ? "" : "s")}" : "")}{(hours != 0 && minutes != 0 ? " and " : "")}{(minutes != 0 ? $"{minutes} minute{(minutes == 1 ? "" : "s")}" : "")}";
-                    label.Location = new Point(300, location + 2);
-                    label.Font = new Font("Arial", 10, FontStyle.Regular);
-                    label.AutoSize = true;
-                    ViewPanel.Controls.Add(label);
+                    // Displays wait time
+                    ViewPanel.Controls.Add(CreateLabel($"Wait Time: {(hours != 0 ? $"{hours} hour{(hours == 1 ? "" : "s")}" : "")}{(hours != 0 && minutes != 0 ? " and " : "")}{(((minutes != -1 && hours == 0) || minutes != 0) ? $"{minutes} minute{(minutes == 1 ? "" : "s")}" : "")}", new Point(300, location + 2), 10, FontStyle.Regular, null, null));
                 }
 
                 TimeOnly time = attraction.GetTime();
                 if (time != TimeOnly.Parse("3:00 am"))
                 {
-                    label = new Label();
-                    label.Text = $"Enter Time: {time}";
-                    label.Location = new Point(600, location + 2);
-                    label.Font = new Font("Arial", 10, FontStyle.Regular);
-                    label.AutoSize = true;
-                    ViewPanel.Controls.Add(label);
+                    // Displays enter time
+                    ViewPanel.Controls.Add(CreateLabel($"Enter Time: {time}", new Point(600, location + 2), 10, FontStyle.Regular, null, null));
                 }
 
                 location += 30;
@@ -908,28 +709,14 @@ namespace Theme_Park_Tracker
             Button clickedButton = (Button)sender;
             Visit visit = (Visit)clickedButton.Tag;
 
-            Button button = new Button();
-            button.Text = "Save visit";
-            button.Location = new Point(1120, 14);
-            button.Size = new Size(70, 30);
-            button.Tag = visit;
-            button.Click += SaveVisit;
-            ViewPanel.Controls.Add(button);
+            // Saves Visit
+            ViewPanel.Controls.Add(CreateButton("Save Visit", new Point(1120, 14), SaveVisit, visit));
 
-            button = new Button();
-            button.Text = "Delete visit";
-            button.Location = new Point(1110, 610);
-            button.Size = new Size(80, 30);
-            button.Tag = visit;
-            button.Click += DeleteVisit;
-            ViewPanel.Controls.Add(button);
+            // Deleted Visit
+            ViewPanel.Controls.Add(CreateButton("Delete Visit", new Point(1120, 14), DeleteVisit, visit));
 
-            Label label = new Label();
-            label.Text = "Theme Park:";
-            label.Location = new Point(14, 14);
-            label.Font = new Font("Arial", 10, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // "Theme Park" text
+            ViewPanel.Controls.Add(CreateLabel("Theme Park:", new Point(14, 14), 10, FontStyle.Regular, null, null));
 
             ComboBox comboBox = new ComboBox();
             Database.parks.OrderBy(park => park.GetName());
@@ -949,12 +736,8 @@ namespace Theme_Park_Tracker
             comboBox.Size = new Size(200, 10);
             ViewPanel.Controls.Add(comboBox);
 
-            label = new Label();
-            label.Text = "Date:";
-            label.Location = new Point(14, 35);
-            label.Font = new Font("Arial", 10, FontStyle.Regular);
-            label.AutoSize = true;
-            ViewPanel.Controls.Add(label);
+            // "Date" text
+            ViewPanel.Controls.Add(CreateLabel("Date:", new Point(14, 35), 10, FontStyle.Regular, null, null));
 
             DateTimePicker datePicker = new DateTimePicker();
             datePicker.Location = new Point(105, 33);
@@ -981,13 +764,8 @@ namespace Theme_Park_Tracker
                 ViewPanel.Controls.Add(comboBox);
             }
 
-            button = new Button();
-            button.Text = "Add Ride";
-            button.Location = new Point(14, 70);
-            button.Size = new Size(70, 30);
-            button.Tag = comboBox;
-            button.Click += AttractionClicked;
-            ViewPanel.Controls.Add(button);
+            // Adds Ride
+            ViewPanel.Controls.Add(CreateButton("Add Ride", new Point(14, 70), AttractionClicked, comboBox));
 
             foreach (VisitAttraction attraction in visit.GetAttractions())
             {
@@ -1097,20 +875,11 @@ namespace Theme_Park_Tracker
                 panel.Name = "Panel";
                 ViewPanel.Controls.Add(panel);
 
-                Label label = new Label();
-                label.Text = attraction.GetName(DateOnly.FromDateTime(DateTime.Now));
-                label.Location = new Point(9, 9);
-                label.Font = new Font("Arial", 10, FontStyle.Bold);
-                label.AutoSize = true;
-                label.Tag = attraction;
-                panel.Controls.Add(label);
+                // Displays attractions name
+                panel.Controls.Add(CreateLabel(attraction.GetName(DateOnly.FromDateTime(DateTime.Now)), new Point(9, 9), 10, FontStyle.Bold, null, attraction));
 
-                label = new Label();
-                label.Text = "Wait time:";
-                label.Location = new Point(239, 9);
-                label.Font = new Font("Arial", 10, FontStyle.Regular);
-                label.AutoSize = true;
-                panel.Controls.Add(label);
+                // "Wait time" text
+                panel.Controls.Add(CreateLabel("Wait time:", new Point(239, 9), 10, FontStyle.Regular, null, null));
 
                 NumericUpDown numericUpDown = new NumericUpDown();
                 numericUpDown.Location = new Point(309, 5);
@@ -1132,12 +901,8 @@ namespace Theme_Park_Tracker
                     }
                 }
 
-                label = new Label();
-                label.Text = "Entry time:";
-                label.Location = new Point(469, 9);
-                label.Font = new Font("Arial", 10, FontStyle.Regular);
-                label.AutoSize = true;
-                panel.Controls.Add(label);
+                // "Entry time" text
+                panel.Controls.Add(CreateLabel("Entry time:", new Point(469, 9), 10, FontStyle.Regular, null, null));
 
                 DateTimePicker timePicker = new DateTimePicker();
                 timePicker.Format = DateTimePickerFormat.Time;
@@ -1161,29 +926,14 @@ namespace Theme_Park_Tracker
                     }
                 }
 
-                Button button = new Button();
-                button.Text = "/\\";
-                button.Location = new Point(810, 5);
-                button.Size = new Size(25, 25);
-                button.Tag = panel;
-                button.Click += MoveAttractionUp;
-                panel.Controls.Add(button);
+                // Move item up text
+                panel.Controls.Add(CreateButton("/\\", new Point(810, 5), MoveAttractionUp, panel));
 
-                button = new Button();
-                button.Text = "\\/";
-                button.Location = new Point(840, 5);
-                button.Size = new Size(25, 25);
-                button.Tag = panel;
-                button.Click += MoveAttractionDown;
-                panel.Controls.Add(button);
+                // Move item down text
+                panel.Controls.Add(CreateButton("\\/", new Point(840, 5), MoveAttractionDown, panel));
 
-                button = new Button();
-                button.Text = "D";
-                button.Location = new Point(870, 5);
-                button.Size = new Size(25, 25);
-                button.Tag = panel;
-                button.Click += DeleteAttraction;
-                panel.Controls.Add(button);
+                // Delete item text
+                panel.Controls.Add(CreateButton("D", new Point(870, 5), DeleteAttraction, panel));
             }
         }
         public void MoveAttractionUp(object sender, EventArgs e)
@@ -1292,12 +1042,8 @@ namespace Theme_Park_Tracker
         {
             ViewPanel.Controls.Clear();
 
-            Button button = new Button();
-            button.Text = "New Park";
-            button.Location = new Point(14, 14);
-            button.Size = new Size(100, 30);
-            button.Click += NewPark;
-            ViewPanel.Controls.Add(button);
+            // New Park button
+            ViewPanel.Controls.Add(CreateButton("New Park", new Point(14, 14), NewPark, null));
 
             if (Database.parks.Count != 0)
             {
@@ -1305,31 +1051,17 @@ namespace Theme_Park_Tracker
 
                 foreach (Park park in Database.parks)
                 {
-                    Label label = new Label();
-                    label.Text = park.GetName();
-                    label.Location = new Point(14, location);
-                    label.Font = new Font("Arial", 20, FontStyle.Regular);
-                    label.AutoSize = true;
-                    label.Tag = park;
-                    label.Click += ViewThemeParkClicked;
-                    label.Cursor = Cursors.Hand;
-                    ViewPanel.Controls.Add(label);
+                    // Parks name
+                    ViewPanel.Controls.Add(CreateLabel(park.GetName(), new Point(14, location), 20, FontStyle.Regular, ViewThemeParkClicked, park));
 
-                    label = new Label();
+                    // Rides in park count
                     int parkRides = Database.GetAttractionByPark(park.GetID()).Count;
-                    label.Text = $"{parkRides} ride{(parkRides == 1 ? "" : "s")} tracked";
-                    label.Location = new Point(1100, location + 8);
-                    label.Font = new Font("Arial", 10, FontStyle.Regular);
-                    label.AutoSize = true;
-                    ViewPanel.Controls.Add(label);
+                    ViewPanel.Controls.Add(CreateLabel($"{parkRides} ride{(parkRides == 1 ? "" : "s")} tracked", new Point(1100, location + 8), 10, FontStyle.Regular, null, null));
 
                     if (location != 74)
                     {
-                        label = new Label();
-                        label.BorderStyle = BorderStyle.FixedSingle;
-                        label.Size = new Size(1186, 1);
-                        label.Location = new Point(14, location - 10);
-                        ViewPanel.Controls.Add(label);
+                        // Partition between Parks
+                        ViewPanel.Controls.Add(CreatePartition(location - 10));
                     }
 
                     location += 50;
@@ -1337,12 +1069,8 @@ namespace Theme_Park_Tracker
             }
             else
             {
-                Label label = new Label();
-                label.Text = "No Theme Parks to display. Click 'New Park' to get started!";
-                label.Location = new Point(50, 317);
-                label.Font = new Font("Arial", 10, FontStyle.Regular);
-                label.AutoSize = true;
-                ViewPanel.Controls.Add(label);
+                // No activity message
+                ViewPanel.Controls.Add(CreateLabel("No Theme Parks to display. Click 'New Park' to get started!", new Point(50, 317), 10, FontStyle.Regular, null, null));
             }
         }
         public void ViewThemeParkClicked(object sender, EventArgs e)
@@ -1432,7 +1160,7 @@ namespace Theme_Park_Tracker
                     location += 30;
                 }
             }
-        }
+        } // Next Rework
         public void NewPark(object sender, EventArgs e)
         {
             Park park = new Park(Database.GetNextParkID(), "");
@@ -2717,6 +2445,57 @@ namespace Theme_Park_Tracker
         private void saveButton_Click(object sender, EventArgs e)
         {
             Database.SaveData();
+        }
+
+        public Label CreateLabel(string text, Point location, int fontSize, FontStyle fontStyle, EventHandler clickEvent, object tag)
+        {
+            Label label = new Label();
+            label.Text = text;
+            label.Location = location;
+            label.Font = new Font("Arial", fontSize, fontStyle);
+            label.AutoSize = true;
+            label.Click += clickEvent;
+            label.Tag = tag;
+            if (clickEvent != null)
+            {
+                label.Cursor = Cursors.Hand;
+                if (tag != null)
+                {
+                    string type = tag.GetType().Name;
+                    if (type == "Tuple`2") type = tag.GetType().ToString().Split('.')[2].Split(',')[0];
+                    ToolTip toolTip = new ToolTip();
+                    toolTip.SetToolTip(label, $"Go to {type}");
+                }
+            }
+            return label;
+        }
+        public Button CreateButton(string text, Point location, EventHandler clickEvent, object tag)
+        {
+            Button button = new Button();
+            button.Text = text;
+            button.Location = location;
+            button.AutoSize = true;
+            button.Tag = tag;
+            button.Click += clickEvent;
+            button.Cursor = Cursors.Hand;
+            return button;
+        }
+        public TextBox CreateTextBox(string text, Point location, int width, Boolean password)
+        {
+            TextBox textBox = new TextBox();
+            textBox.Text = text;
+            textBox.Location = location;
+            textBox.Width = width;
+            textBox.UseSystemPasswordChar = password;
+            return textBox;
+        }
+        public Label CreatePartition(int height)
+        {
+            Label label = new Label();
+            label.BorderStyle = BorderStyle.FixedSingle;
+            label.Size = new Size(1186, 1);
+            label.Location = new Point(14, height);
+            return label;
         }
     }
 }

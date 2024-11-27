@@ -52,7 +52,7 @@ namespace Theme_Park_Tracker
         }
         public static List<Visit> GetVisitsByProfileID(int id)
         {
-            List<Visit> selectedVisits = visits.AsParallel().Where(visit => visit.GetID() == id).ToList();
+            List<Visit> selectedVisits = visits.AsParallel().Where(visit => visit.GetProfile().GetID() == id).ToList();
             return selectedVisits;
         }
         public static List<Visit> GetVisitsByParkID(int id)
