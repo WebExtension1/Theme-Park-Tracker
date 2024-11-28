@@ -115,64 +115,97 @@ namespace Theme_Park_Tracker
         {
             List<Task> tasks = new List<Task>();
 
-            tasks.Add(Task.Run(async () =>
+            tasks.Add(Task.Run(() =>
             {
-                StreamWriter sw = new StreamWriter("Profiles.txt");
+                // Saves all Profile information
+                FileStream fs = new FileStream("Profiles.dat", FileMode.Create);
+                BinaryWriter bw = new BinaryWriter(fs);
+
                 foreach (Profile profile in profiles)
                 {
-                    await sw.WriteLineAsync($"{profile.GetID()}\n{profile.GetUsername()}\n{profile.GetEmail()}\n{profile.GetPassword()}");
+                    bw.Write(profile.GetID());
+                    bw.Write(profile.GetUsername());
+                    bw.Write(profile.GetEmail());
+                    bw.Write(profile.GetPassword());
                 }
-                await sw.WriteLineAsync("end");
-                sw.Close();
+
+                bw.Close();
+                fs.Close();
             }));
 
-            tasks.Add(Task.Run(async () =>
+            tasks.Add(Task.Run(() =>
             {
-                StreamWriter sw = new StreamWriter("Parks.txt");
-                foreach (Park park in parks)
+                // Loads all Park information
+                FileStream fs = new FileStream("Parks.dat", FileMode.Create);
+                BinaryWriter bw = new BinaryWriter(fs);
+
+                foreach(Park park in parks)
                 {
-                    await sw.WriteLineAsync($"{park.GetID()}\n{park.GetName()}");
+                    bw.Write(park.GetID());
+                    bw.Write(park.GetName());
                 }
-                await sw.WriteLineAsync("end");
-                sw.Close();
+
+                bw.Close();
+                fs.Close();
             }));
 
-            tasks.Add(Task.Run(async () =>
+            tasks.Add(Task.Run(() =>
             {
-                StreamWriter sw = new StreamWriter("Visits.txt");
+                // Loads all Visit information
+                FileStream fs = new FileStream("Visits.dat", FileMode.Create);
+                BinaryWriter bw = new BinaryWriter(fs);
+
                 foreach (Visit visit in visits)
                 {
-                    await sw.WriteLineAsync($"{visit.GetID()}\n{visit.GetDate()}\n{visit.GetProfile().GetID()}\n{visit.GetPark().GetID()}");
+                    bw.Write(visit.GetID());
+                    bw.Write(visit.GetDate().ToString());
+                    bw.Write(visit.GetProfile().GetID());
+                    bw.Write(visit.GetPark().GetID());
                 }
-                await sw.WriteLineAsync("end");
-                sw.Close();
+
+                bw.Close();
+                fs.Close();
             }));
 
-            tasks.Add(Task.Run(async () =>
+            tasks.Add(Task.Run(() =>
             {
-                StreamWriter sw = new StreamWriter("Manufacturers.txt");
+                // Loads all Manufacturer information
+                FileStream fs = new FileStream("Manufacturers.dat", FileMode.Create);
+                BinaryWriter bw = new BinaryWriter(fs);
+
                 foreach (Manufacturer manufacturer in manufacturers)
                 {
-                    await sw.WriteLineAsync($"{manufacturer.GetID()}\n{manufacturer.GetName()}");
+                    bw.Write(manufacturer.GetID());
+                    bw.Write(manufacturer.GetName());
                 }
-                await sw.WriteLineAsync("end");
-                sw.Close();
+
+                bw.Close();
+                fs.Close();
             }));
 
-            tasks.Add(Task.Run(async () =>
+            tasks.Add(Task.Run(() =>
             {
-                StreamWriter sw = new StreamWriter("RideTypes.txt");
+                // Loads all Ride Type information
+                FileStream fs = new FileStream("RideTypes.dat", FileMode.Create);
+                BinaryWriter bw = new BinaryWriter(fs);
+
                 foreach (RideType rideType in rideTypes)
                 {
-                    await sw.WriteLineAsync($"{rideType.GetID()}\n{rideType.GetName()}\n{rideType.GetManufacturer().GetID()}");
+                    bw.Write(rideType.GetID());
+                    bw.Write(rideType.GetName());
+                    bw.Write(rideType.GetManufacturer().GetID());
                 }
-                await sw.WriteLineAsync("end");
-                sw.Close();
+
+                bw.Close();
+                fs.Close();
             }));
 
-            tasks.Add(Task.Run(async () =>
+            tasks.Add(Task.Run(() =>
             {
-                StreamWriter sw = new StreamWriter("Attractions.txt");
+                // Loads all Attraction information
+                FileStream fs = new FileStream("Attractions.dat", FileMode.Create);
+                BinaryWriter bw = new BinaryWriter(fs);
+
                 foreach (Attraction attraction in attractions)
                 {
                     string rideType = "None";
@@ -180,55 +213,76 @@ namespace Theme_Park_Tracker
                     {
                         rideType = attraction.GetRideType().GetID().ToString();
                     }
-                    await sw.WriteLineAsync($"{attraction.GetID()}\n{attraction.GetOpeningName()}\n{attraction.GetOpeningDate()}\n{attraction.GetPark().GetID()}\n{rideType}");
+
+                    bw.Write(attraction.GetID());
+                    bw.Write(attraction.GetOpeningName());
+                    bw.Write(attraction.GetOpeningDate().ToString());
+                    bw.Write(attraction.GetPark().GetID());
+                    bw.Write(rideType);
+
                     List<string> elements = attraction.GetElements();
                     switch (elements[0])
                     {
                         case "1":
                             Rollercoaster rollercoaster = (Rollercoaster)attraction;
-                            await sw.WriteLineAsync($"1-{rollercoaster.GetTrackLength()}-{rollercoaster.GetTopSpeed()}-{rollercoaster.GetInversions()}");
+                            bw.Write($"1-{rollercoaster.GetTrackLength()}-{rollercoaster.GetTopSpeed()}-{rollercoaster.GetInversions()}");
                             break;
                         case "2":
                             DarkRide darkRide = (DarkRide)attraction;
-                            await sw.WriteLineAsync($"2-{darkRide.GetTrackLength()}-{darkRide.GetTypeNum()}");
+                            bw.Write($"2-{darkRide.GetTrackLength()}-{darkRide.GetTypeNum()}");
                             break;
                         case "3":
                             FlatRide flatRide = (FlatRide)attraction;
-                            await sw.WriteLineAsync($"3-{flatRide.GetTypeNum()}");
+                            bw.Write($"3-{flatRide.GetTypeNum()}");
                             break;
 
                     }
                 }
-                await sw.WriteLineAsync("end");
-                sw.Close();
+
+                bw.Close();
+                fs.Close();
             }));
 
-            tasks.Add(Task.Run(async () =>
+            tasks.Add(Task.Run(() =>
             {
-                StreamWriter sw = new StreamWriter("AttractionRenames.txt");
+                // Loads all Attraction Rename information
+                FileStream fs = new FileStream("AttractionRenames.dat", FileMode.Create);
+                BinaryWriter bw = new BinaryWriter(fs);
+
                 foreach (Attraction attraction in attractions)
                 {
                     foreach (AttractionRename rename in attraction.GetRenames())
                     {
-                        await sw.WriteLineAsync($"{attraction.GetID()}\n{rename.GetDate()}\n{rename.GetName()}");
+                        bw.Write(attraction.GetID());
+                        bw.Write(rename.GetDate().ToString());
+                        bw.Write(rename.GetName());
                     }
                 }
-                await sw.WriteLineAsync("end");
-                sw.Close();
+
+                bw.Close();
+                fs.Close();
             }));
 
-            tasks.Add(Task.Run(async () =>
+            tasks.Add(Task.Run(() =>
             {
-                StreamWriter sw = new StreamWriter("VisitAttractions.txt");
+                // Loads all Visit Attraction information
+                FileStream fs = new FileStream("VisitAttractions.dat", FileMode.Create);
+                BinaryWriter bw = new BinaryWriter(fs);
+
                 foreach (Visit visit in visits)
                 {
                     foreach (VisitAttraction attraction in visit.GetAttractions())
                     {
-                        await sw.WriteLineAsync($"{visit.GetID()}\n{attraction.GetOrder()}\n{attraction.GetAttraction().GetID()}\n{attraction.GetTime()}\n{attraction.GetWaitTime()}");
+                        bw.Write(visit.GetID());
+                        bw.Write(attraction.GetOrder());
+                        bw.Write(attraction.GetAttraction().GetID());
+                        bw.Write(attraction.GetTime().ToString());
+                        bw.Write(attraction.GetWaitTime());
                     }
                 }
-                await sw.WriteLineAsync("end");
-                sw.Close();
+
+                bw.Close();
+                fs.Close();
             }));
 
             await Task.WhenAll(tasks);
