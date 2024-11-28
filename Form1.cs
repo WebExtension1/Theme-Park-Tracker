@@ -81,7 +81,7 @@ namespace Theme_Park_Tracker
 
             tasks1.Add(Task.Run(() =>
             {
-                // Loads all the manufacturers information
+                // Loads all the Manufacturer information
                 if (!File.Exists("Manufacturers.dat"))
                 {
                     File.Create("Manufacturers.dat");
@@ -107,7 +107,7 @@ namespace Theme_Park_Tracker
 
             tasks2.Add(Task.Run(() =>
             {
-                // Loads all the visits information
+                // Loads all the Visit information
                 if (!File.Exists("Visits.dat"))
                 {
                     File.Create("Visits.dat");
@@ -138,7 +138,7 @@ namespace Theme_Park_Tracker
 
             tasks2.Add(Task.Run(() =>
             {
-                // Loads all ride type information
+                // Loads all Ride Type information
                 if (!File.Exists("RideTypes.dat"))
                 {
                     File.Create("RideTypes.dat");
@@ -163,7 +163,7 @@ namespace Theme_Park_Tracker
 
             tasks2.Add(Task.Run(() =>
             {
-                // Loads all attraction information
+                // Loads all Attraction information
                 if (!File.Exists("Attractions.dat"))
                 {
                     File.Create("Attractions.dat");
@@ -220,7 +220,7 @@ namespace Theme_Park_Tracker
 
             tasks3.Add(Task.Run(() =>
             {
-                // Loads all attraction rename information
+                // Loads all Attraction Rename information
                 if (!File.Exists("AttractionRenames.dat"))
                 {
                     File.Create("AttractionRenames.dat");
@@ -250,7 +250,7 @@ namespace Theme_Park_Tracker
 
             tasks3.Add(Task.Run(() =>
             {
-                // Loads all visit attraction information
+                // Loads all Visit Sttraction information
                 if (!File.Exists("VisitAttractions.dat"))
                 {
                     File.Create("VisitAttractions.dat");
@@ -322,10 +322,10 @@ namespace Theme_Park_Tracker
             ViewPanel.Controls.Add(CreateLabel("Password:", null, new Point(100, 275), 15, FontStyle.Regular, null, null));
 
             // Username field
-            ViewPanel.Controls.Add(CreateTextBox(null, new Point(210, 230), 200, false));
+            ViewPanel.Controls.Add(CreateTextBox(null, "Username", new Point(210, 230), 200, false));
 
             // Password field
-            ViewPanel.Controls.Add(CreateTextBox(null, new Point(210, 275), 200, true));
+            ViewPanel.Controls.Add(CreateTextBox(null, "Password", new Point(210, 275), 200, true));
 
             // Login button
             ViewPanel.Controls.Add(CreateButton("Login", new Point(205, 320), LogInClicked, null));
@@ -335,10 +335,12 @@ namespace Theme_Park_Tracker
         }
         public void LogInClicked(object sender, EventArgs e)
         {
-            Button button = (Button)sender;
-            TextBox textBox = (TextBox)ViewPanel.Controls[3];
+            // Get Username
+            TextBox textBox = (TextBox)ViewPanel.Controls.Find("Username", true)[0];
             string username = textBox.Text;
-            textBox = (TextBox)ViewPanel.Controls[4];
+
+            // Get Password
+            textBox = (TextBox)ViewPanel.Controls.Find("Password", true)[0];
             string password = textBox.Text;
 
             Profile checkProfile = Database.GetProfileByUsername(username);
@@ -380,16 +382,16 @@ namespace Theme_Park_Tracker
             ViewPanel.Controls.Add(CreateLabel("Password:", null, new Point(100, 365), 15, FontStyle.Regular, null, null));
 
             // Username Field
-            ViewPanel.Controls.Add(CreateTextBox(null, new Point(210, 230), 200, false));
+            ViewPanel.Controls.Add(CreateTextBox(null, "Username", new Point(210, 230), 200, false));
 
             // Email Field
-            ViewPanel.Controls.Add(CreateTextBox(null, new Point(210, 275), 200, false));
+            ViewPanel.Controls.Add(CreateTextBox(null, "Email", new Point(210, 275), 200, false));
 
             // Password Field
-            ViewPanel.Controls.Add(CreateTextBox(null, new Point(210, 320), 200, true));
+            ViewPanel.Controls.Add(CreateTextBox(null, "Password1", new Point(210, 320), 200, true));
 
             // Password Field for confirm password
-            ViewPanel.Controls.Add(CreateTextBox(null, new Point(210, 365), 200, true));
+            ViewPanel.Controls.Add(CreateTextBox(null, "Password2", new Point(210, 365), 200, true));
 
             // Sign Up Button
             ViewPanel.Controls.Add(CreateButton("Sign Up", new Point(205, 410), SignUpClicked, null));
@@ -399,14 +401,20 @@ namespace Theme_Park_Tracker
         }
         public void SignUpClicked(object sender, EventArgs e)
         {
-            Button button = (Button)sender;
-            TextBox textBox = (TextBox)ViewPanel.Controls[5];
+            // Get Username
+            TextBox textBox = (TextBox)ViewPanel.Controls.Find("Username", true)[0];
             string username = textBox.Text;
-            textBox = (TextBox)ViewPanel.Controls[6];
+
+            // Get Email
+            textBox = (TextBox)ViewPanel.Controls.Find("Email", true)[0];
             string email = textBox.Text;
-            textBox = (TextBox)ViewPanel.Controls[7];
+
+            // Get Password1
+            textBox = (TextBox)ViewPanel.Controls.Find("Password1", true)[0];
             string password1 = textBox.Text;
-            textBox = (TextBox)ViewPanel.Controls[8];
+
+            // Get Password2
+            textBox = (TextBox)ViewPanel.Controls.Find("Password2", true)[0];
             string password2 = textBox.Text;
 
             if (username.Trim() == "" || email.Trim() == "" || password1.Trim() == "" || password2.Trim() == "")
@@ -471,25 +479,25 @@ namespace Theme_Park_Tracker
             ViewPanel.Controls.Add(CreateLabel("Username:", null, new Point(14, 80), 15, FontStyle.Regular, null, null));
 
             // Username field
-            textBoxes.Add(CreateTextBox(Database.profile.GetUsername(), new Point(130, 82), 200, false));
+            textBoxes.Add(CreateTextBox(Database.profile.GetUsername(), "Username", new Point(130, 82), 200, false));
             ViewPanel.Controls.Add(textBoxes[0]);
 
             // "Email" text
             ViewPanel.Controls.Add(CreateLabel("Email:", null, new Point(14, 110), 15, FontStyle.Regular, null, null));
 
             // Email field
-            textBoxes.Add(CreateTextBox(Database.profile.GetEmail(), new Point(130, 112), 200, false));
+            textBoxes.Add(CreateTextBox(Database.profile.GetEmail(), "Email", new Point(130, 112), 200, false));
             ViewPanel.Controls.Add(textBoxes[1]);
 
             // "Password" text
             ViewPanel.Controls.Add(CreateLabel("Password:", null, new Point(14, 140), 15, FontStyle.Regular, null, null));
 
             // Password field
-            textBoxes.Add(CreateTextBox(null, new Point(130, 142), 200, true));
+            textBoxes.Add(CreateTextBox(null, "Password", new Point(130, 142), 200, true));
             ViewPanel.Controls.Add(textBoxes[2]);
 
             // Update info button
-            ViewPanel.Controls.Add(CreateButton("Update", new Point(110, 180), UpdateButtonClicked, textBoxes));
+            ViewPanel.Controls.Add(CreateButton("Update", new Point(110, 180), UpdateButtonClicked, null));
 
             // "Other Users" label for list of other users
             ViewPanel.Controls.Add(CreateLabel("Other Users", null, new Point(14, 230), 15, FontStyle.Regular, null, null));
@@ -507,12 +515,12 @@ namespace Theme_Park_Tracker
         }
         private void UpdateButtonClicked(object sender, EventArgs e)
         {
-            Button button = (Button)sender;
-            List<TextBox> textBoxes = (List<TextBox>)button.Tag;
-
-            if (Database.VerifyInfo(textBoxes[0].Text, textBoxes[1].Text, textBoxes[2].Text))
+            string username = ((TextBox)ViewPanel.Controls.Find("Username", true)[0]).Text;
+            string email = ((TextBox)ViewPanel.Controls.Find("Email", true)[0]).Text;
+            string password = ((TextBox)ViewPanel.Controls.Find("Password", true)[0]).Text;
+            if (Database.VerifyInfo(username, email, password))
             {
-                Database.profile.UpdateInfo(textBoxes[0].Text, textBoxes[1].Text, textBoxes[2].Text);
+                Database.profile.UpdateInfo(username, email, password);
             }
         }
         private void ViewProfileClicked(object sender, EventArgs e)
@@ -760,6 +768,7 @@ namespace Theme_Park_Tracker
             comboBox.SelectedIndexChanged += ThemeParkChangedOnVisit;
             comboBox.Location = new Point(105, 12);
             comboBox.Size = new Size(200, 10);
+            comboBox.Name = "Park";
             ViewPanel.Controls.Add(comboBox);
 
             // "Date" text
@@ -771,6 +780,7 @@ namespace Theme_Park_Tracker
             {
                 datePicker.Value = visit.GetDate().ToDateTime(TimeOnly.Parse("10:00 PM"));
             }
+            datePicker.Name = "Date";
             ViewPanel.Controls.Add(datePicker);
 
             int selectedPark = comboBox.SelectedIndex;
@@ -808,17 +818,16 @@ namespace Theme_Park_Tracker
             clickedButton.Tag = tuple;
             sender = (object)clickedButton;
 
-            ComboBox comboBox = (ComboBox)ViewPanel.Controls[3];
+            ComboBox comboBox = (ComboBox)ViewPanel.Controls.Find("Park", true)[0];
             visit.SetPark(Database.GetParkByID(comboBox.SelectedIndex + 1));
 
-            DateTimePicker datePicker = (DateTimePicker)ViewPanel.Controls[5];
+            DateTimePicker datePicker = (DateTimePicker)ViewPanel.Controls.Find("Date", true)[0];
             visit.SetDate(DateOnly.FromDateTime(datePicker.Value));
 
             List<VisitAttraction> attractions = new List<VisitAttraction>();
 
-            for (int index = 8; index < ViewPanel.Controls.Count; index++)
+            foreach (Panel attractionPanel in ViewPanel.Controls.Find("Panel", true))
             {
-                Panel attractionPanel = (Panel)ViewPanel.Controls[index];
                 Attraction attraction = (Attraction)attractionPanel.Controls[0].Tag;
                 int order = ((attractionPanel.Location.Y - 112) / 40) + 1;
                 int waitTime = -1;
@@ -1182,7 +1191,7 @@ namespace Theme_Park_Tracker
             ViewPanel.Controls.Add(CreateLabel("Name:", null, new Point(14, 14), 10, FontStyle.Regular, null, null));
 
             // Park name field
-            ViewPanel.Controls.Add(CreateTextBox($"{(park == null ? "" : park.GetName())}", new Point(65, 12), 200, false));
+            ViewPanel.Controls.Add(CreateTextBox($"{(park == null ? "" : park.GetName())}", null, new Point(65, 12), 200, false));
 
             if (Database.parks.Contains(park))
             {
@@ -1394,7 +1403,7 @@ namespace Theme_Park_Tracker
             ViewPanel.Controls.Add(CreateLabel("Name:", null, new Point(14, 14), 10, FontStyle.Regular, null, null));
 
             // Manufacturer name field
-            ViewPanel.Controls.Add(CreateTextBox($"{(manufacturer == null ? "" : manufacturer.GetName())}", new Point(65, 12), 200, false));
+            ViewPanel.Controls.Add(CreateTextBox($"{(manufacturer == null ? "" : manufacturer.GetName())}", null, new Point(65, 12), 200, false));
 
             if (Database.manufacturers.Contains(manufacturer))
             {
@@ -1610,7 +1619,7 @@ namespace Theme_Park_Tracker
             ViewPanel.Controls.Add(CreateLabel("Name:", null, new Point(14, 14), 10, FontStyle.Regular, null, null));
 
             // Name field
-            ViewPanel.Controls.Add(CreateTextBox($"{(attraction == null ? "" : attraction.GetName(DateOnly.FromDateTime(DateTime.Now)))}", new Point(115, 12), 200, false));
+            ViewPanel.Controls.Add(CreateTextBox($"{(attraction == null ? "" : attraction.GetName(DateOnly.FromDateTime(DateTime.Now)))}", null, new Point(115, 12), 200, false));
 
             // "Ride Model" text
             ViewPanel.Controls.Add(CreateLabel("Ride Model:", null, new Point(14, 35), 10, FontStyle.Regular, null, null));
@@ -1954,7 +1963,7 @@ namespace Theme_Park_Tracker
             panel.Controls.Add(CreateLabel("Name:", null, new Point(9, 9), 10, FontStyle.Bold, null, rename));
 
             // Rename field
-            panel.Controls.Add(CreateTextBox($"{(rename == null ? "" : rename.GetName())}", new Point(59, 5), 200, false));
+            panel.Controls.Add(CreateTextBox($"{(rename == null ? "" : rename.GetName())}", null, new Point(59, 5), 200, false));
 
             // "Change date" text
             panel.Controls.Add(CreateLabel("Change date:", null, new Point(344, 9), 10, FontStyle.Regular, null, null));
@@ -2092,7 +2101,7 @@ namespace Theme_Park_Tracker
             ViewPanel.Controls.Add(CreateLabel("Name:", null, new Point(14, 14), 10, FontStyle.Regular, null, null));
 
             // "Name" field
-            ViewPanel.Controls.Add(CreateTextBox($"{(rideType == null ? "" : rideType.GetName())}", new Point(100, 12), 200, false));
+            ViewPanel.Controls.Add(CreateTextBox($"{(rideType == null ? "" : rideType.GetName())}", null, new Point(100, 12), 200, false));
         }
         public void SaveRideType(object sender, EventArgs e)
         {
@@ -2143,7 +2152,7 @@ namespace Theme_Park_Tracker
             Database.SaveData();
         }
 
-        public Label CreateLabel(string text, string name, Point location, int fontSize, FontStyle fontStyle, EventHandler clickEvent, object tag)   
+        public Label CreateLabel(string text, string name, Point location, int fontSize, FontStyle fontStyle, EventHandler clickEvent, object tag)
         {
             Label label = new Label();
             label.Text = text;
@@ -2152,6 +2161,7 @@ namespace Theme_Park_Tracker
             label.AutoSize = true;
             label.Click += clickEvent;
             label.Tag = tag;
+            label.Name = name;
             if (clickEvent != null)
             {
                 label.Cursor = Cursors.Hand;
@@ -2176,12 +2186,13 @@ namespace Theme_Park_Tracker
             button.Cursor = Cursors.Hand;
             return button;
         }
-        public TextBox CreateTextBox(string text, Point location, int width, Boolean password)
+        public TextBox CreateTextBox(string text, string name, Point location, int width, Boolean password)
         {
             TextBox textBox = new TextBox();
             textBox.Text = text;
             textBox.Location = location;
             textBox.Width = width;
+            textBox.Name = name;
             textBox.UseSystemPasswordChar = password;
             return textBox;
         }
