@@ -11,8 +11,63 @@ namespace Theme_Park_Tracker
 {
     public partial class Form1 : Form
     {
-        public Form1()
+        public Form1(string[] args)
         {
+            // cd OneDrive - Sheffield Hallam University\Y2\Systems Programming\Theme Park Tracker\bin\Debug\net6.0-windows
+            string last = "";
+            if (args.Length != 0)
+            {
+                switch (args[0].ToLower())
+                {
+                    case "normal":
+                        Database.SetMode(1);
+                        break;
+                    case "debug":
+                        if (args.Length > 1)
+                        {
+                            switch (args[1].ToLower())
+                            {
+                                case "all":
+                                    Database.SetMode(2);
+                                    last = "Debugging: All";
+                                    break;
+                                case "load":
+                                    Database.SetMode(3);
+                                    last = "Debugging: Loading";
+                                    break;
+                                case "save":
+                                    Database.SetMode(4);
+                                    last = "Debugging: Saving";
+                                    break;
+                                case "delete":
+                                    Database.SetMode(5);
+                                    last = "Debugging: Deleting";
+                                    break;
+                                default:
+                                    Database.SetMode(2);
+                                    last = "Debugging: All";
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            Database.SetMode(2);
+                            last = "Debugging: All";
+                        }
+                        break;
+                    default:
+                        Database.SetMode(1);
+                        break;
+                }
+            }
+            else
+            {
+                Database.SetMode(1);
+            }
+            if (Database.GetMode() != 1)
+            {
+                MessageBox.Show($"Program opened in Debug mode\n\n{last}");
+            }
             InitializeComponent();
             InitializeDataAsync();
         }

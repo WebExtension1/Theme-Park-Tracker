@@ -20,6 +20,24 @@ namespace Theme_Park_Tracker
         public static List<RideType> rideTypes = new List<RideType>();
         public static List<Attraction> attractions = new List<Attraction>();
 
+        // Command Line Mode
+        //
+        // 1 - Normal
+        // 2 - Debug - All
+        // 3 - Debug - Load
+        // 4 - Debug - Save
+        // 5 - Debug - Delete
+        //
+        private static int mode;
+        static public void SetMode(int newMode)
+        {
+            mode = newMode;
+        }
+        static public int GetMode()
+        {
+            return mode;
+        }
+
         // Getting Profile data
         public static Profile GetProfileByID(int id)
         {
