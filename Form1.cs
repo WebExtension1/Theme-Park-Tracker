@@ -13,24 +13,16 @@ namespace Theme_Park_Tracker
     {
         public Form1(string[] args)
         {
-            // cd OneDrive - Sheffield Hallam University\Y2\Systems Programming\Theme Park Tracker\bin\Debug\net6.0-windows
             string last = "";
             if (args.Length != 0)
             {
                 switch (args[0].ToLower())
                 {
-                    case "normal":
-                        Database.SetMode(1);
-                        break;
                     case "debug":
                         if (args.Length > 1)
                         {
                             switch (args[1].ToLower())
                             {
-                                case "all":
-                                    Database.SetMode(2);
-                                    last = "Debugging: All";
-                                    break;
                                 case "load":
                                     Database.SetMode(3);
                                     last = "Debugging: Loading";
@@ -55,6 +47,9 @@ namespace Theme_Park_Tracker
                             last = "Debugging: All";
                         }
                         break;
+                    case "reset":
+                        Database.SetMode(6);
+                        break;
                     default:
                         Database.SetMode(1);
                         break;
@@ -64,15 +59,46 @@ namespace Theme_Park_Tracker
             {
                 Database.SetMode(1);
             }
-            if (Database.GetMode() != 1)
+            if (Database.GetMode() != 1 && Database.GetMode() != 6)
             {
                 MessageBox.Show($"Program opened in Debug mode\n\n{last}");
             }
+            else if (Database.GetMode() == 6)
+            {
+                string[] files = { "AttractionRenames.dat", "Attractions.dat", "Manufacturers.dat", "Parks.dat", "Profiles.dat", "RideTypes.dat", "VisitAttraction.dat", "Visits.dat" };
+                foreach (string file in files)
+                {
+                    if (File.Exists(file))
+                    {
+                        File.Delete(file);
+                    }
+                }
+                MessageBox.Show("Reset all files");
+            }
             InitializeComponent();
-            InitializeDataAsync();
+            Task.Run(async () => await InitializeDataAsync()).Wait();
+            if (Database.GetMode() == 2 || Database.GetMode() == 3)
+            {
+                DebugReadFiles();
+            }
         }
+        static void DebugReadFiles()
+        {
+            if (Database.debugMessage != null)
+            {
+                MessageBox.Show(Database.debugMessage);
+                Database.debugMessage = null;
+            }
+            
+            /*
+            DialogResult confirmResult = MessageBox.Show($"This will permentantly delete this Profile, delete all Visits attached to this Profile, and Save the data\n\nAre you sure you want to delete this Profile?", "Confirm Delete", MessageBoxButtons.YesNo);
+            if (confirmResult == DialogResult.Yes)
+            {
 
-        private async void InitializeDataAsync()
+            }
+            */
+        }
+        private async Task InitializeDataAsync()
         {
             await ReadFiles();
             await LinkForeignElements();
@@ -83,6 +109,8 @@ namespace Theme_Park_Tracker
             List<Task> tasks1 = new List<Task>();
             List<Task> tasks2 = new List<Task>();
             List<Task> tasks3 = new List<Task>();
+            bool output = Database.GetMode() == 2 || Database.GetMode() == 3;
+            List<string> fileCreations = new List<string>();
 
             tasks1.Add(Task.Run(() =>
             {
@@ -90,6 +118,7 @@ namespace Theme_Park_Tracker
                 if (!File.Exists("Profiles.dat"))
                 {
                     File.Create("Profiles.dat");
+                    fileCreations.Add("Profiles.dat");
                 }
                 else
                 {
@@ -116,6 +145,7 @@ namespace Theme_Park_Tracker
                 if (!File.Exists("Parks.dat"))
                 {
                     File.Create("Parks.dat");
+                    fileCreations.Add("Parks.dat");
                 }
                 else
                 {
@@ -140,6 +170,7 @@ namespace Theme_Park_Tracker
                 if (!File.Exists("Manufacturers.dat"))
                 {
                     File.Create("Manufacturers.dat");
+                    fileCreations.Add("Manufacturers.dat");
                 }
                 else
                 {
@@ -166,6 +197,7 @@ namespace Theme_Park_Tracker
                 if (!File.Exists("Visits.dat"))
                 {
                     File.Create("Visits.dat");
+                    fileCreations.Add("Visits.dat");
                 }
                 else
                 {
@@ -197,6 +229,7 @@ namespace Theme_Park_Tracker
                 if (!File.Exists("RideTypes.dat"))
                 {
                     File.Create("RideTypes.dat");
+                    fileCreations.Add("RideTypes.dat");
                 }
                 else
                 {
@@ -222,6 +255,7 @@ namespace Theme_Park_Tracker
                 if (!File.Exists("Attractions.dat"))
                 {
                     File.Create("Attractions.dat");
+                    fileCreations.Add("Attractions.dat");
                 }
                 else
                 {
@@ -279,6 +313,7 @@ namespace Theme_Park_Tracker
                 if (!File.Exists("AttractionRenames.dat"))
                 {
                     File.Create("AttractionRenames.dat");
+                    fileCreations.Add("AttractionRenames.dat");
                 }
                 else
                 {
@@ -309,6 +344,7 @@ namespace Theme_Park_Tracker
                 if (!File.Exists("VisitAttractions.dat"))
                 {
                     File.Create("VisitAttractions.dat");
+                    fileCreations.Add("VisitAttractions.dat");
                 }
                 else
                 {
@@ -331,6 +367,15 @@ namespace Theme_Park_Tracker
             }));
 
             await Task.WhenAll(tasks3);
+            if (fileCreations.Count > 0)
+            {
+                string message = "";
+                foreach (string file in fileCreations)
+                {
+                    message += $"\n- {file}";
+                }
+                Database.debugMessage = $"The following files were created:{message}";
+            }
         }
         static async Task LinkForeignElements()
         {
@@ -362,6 +407,7 @@ namespace Theme_Park_Tracker
 
             await Task.WhenAll(tasks);
         }
+
 
         public void DisplayLogin(object sender, EventArgs e)
         {

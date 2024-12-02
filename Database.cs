@@ -20,15 +20,19 @@ namespace Theme_Park_Tracker
         public static List<RideType> rideTypes = new List<RideType>();
         public static List<Attraction> attractions = new List<Attraction>();
 
-        // Command Line Mode
+        // cd OneDrive - Sheffield Hallam University\Y2\Systems Programming\Theme Park Tracker\bin\Debug\net6.0-windows
+        //
+        // Command Line Modes
         //
         // 1 - Normal
         // 2 - Debug - All
         // 3 - Debug - Load
         // 4 - Debug - Save
         // 5 - Debug - Delete
+        // 6 - Reset
         //
         private static int mode;
+        public static string debugMessage = null;
         static public void SetMode(int newMode)
         {
             mode = newMode;
