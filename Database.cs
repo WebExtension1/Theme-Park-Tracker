@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Threading.Tasks;
+using System.Threading;
+using System.Diagnostics;
 
 namespace Theme_Park_Tracker
 {
@@ -71,12 +72,47 @@ namespace Theme_Park_Tracker
         // Getting RideType data
         public static RideType GetRideTypeByID(int id)
         {
+            // While testing, I found very mixeed results. With low and high values, finding a specific item from the list was dependant on the position.
+            // So I've left it as parallel as achievably higher values were more consistently better.
+
             RideType selectedRideType = rideTypes.AsParallel().Where(rideType => rideType.GetID() == id).FirstOrDefault();
             return selectedRideType;
         }
         public static List<RideType> GetRideTypesByManufacturerID(int id)
         {
-            List<RideType> selectedRideTypes = rideTypes.AsParallel().Where(rideType => rideType.GetManufacturer().GetID() == id).ToList();
+            // TESTS
+            //
+            // 5,000,000 items (132 MB).
+            // Parallel: 193
+            // Non Parallel: 357
+            //
+            // 500,000 items (13 MB).
+            // Parallel 19
+            // Non Parallel: 11
+            //
+            // < 10,000 items
+            // Parallel and Non parallel both 0
+            //
+            // Conclusion: Getting multiple items from my lists only become more efficient in Parallel after an unreachably high number.
+            // The remaining commented lines can be uncommented to replicate my tests
+            //
+
+            //Stopwatch stopwatch = new Stopwatch();
+            //stopwatch.Start();
+
+            List<RideType> selectedRideTypes;
+
+            //selectedRideTypes = rideTypes.AsParallel().Where(rideType => rideType.GetManufacturer().GetID() == id).ToList();
+            //long parallel = stopwatch.ElapsedMilliseconds;
+
+            //stopwatch.Restart();
+            selectedRideTypes = rideTypes.Where(rideType => rideType.GetManufacturer().GetID() == id).ToList();
+            //long nonParallel = stopwatch.ElapsedMilliseconds;
+
+            //// Create a the global variable "first" and set it to 0 to avoid this message trying to pop up possible millions of times
+            //if (first == 0) MessageBox.Show($"Parallel: {parallel}\nNot Parallel: {nonParallel}");
+            //first = 1;
+
             return selectedRideTypes;
         }
 

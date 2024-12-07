@@ -494,7 +494,6 @@ namespace Theme_Park_Tracker
             await Task.WhenAll(tasks);
         }
 
-
         public void DisplayLogin(object sender, EventArgs e)
         {
             ViewPanel.Controls.Clear();
