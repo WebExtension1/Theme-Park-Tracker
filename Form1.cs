@@ -13,12 +13,13 @@ namespace Theme_Park_Tracker
     {
         public Form1(string[] args)
         {
-            string last = "";
-            if (args.Length != 0)
+            // cd OneDrive - Sheffield Hallam University\Y2\Systems Programming\Theme Park Tracker\bin\Debug\net6.0-windows
+            string[] files = { "AttractionRenames.dat", "Attractions.dat", "Manufacturers.dat", "Parks.dat", "Profiles.dat", "RideTypes.dat", "VisitAttractions.dat", "Visits.dat" };
+            
+            if (args.Length > 0)
             {
                 if (args[0].ToLower() == "reset")
                 {
-                    string[] files = { "AttractionRenames.dat", "Attractions.dat", "Manufacturers.dat", "Parks.dat", "Profiles.dat", "RideTypes.dat", "VisitAttraction.dat", "Visits.dat" };
                     bool filesDeleted = false;
                     foreach (string file in files)
                     {
@@ -38,8 +39,168 @@ namespace Theme_Park_Tracker
                     }
                 }
             }
+
             InitializeComponent();
             InitializeDataAsync();
+
+            if (args.Length > 0)
+            {
+                if (args[0].ToLower() == "all")
+                {
+                    MessageBox.Show("Populating");
+                    int amount = int.Parse(args[1].ToLower());
+                    int secondaryAmount = 0;
+                    try
+                    {
+                        secondaryAmount = int.Parse(args[2]);
+                    }
+                    catch (Exception ex) { }
+                    foreach (string fileName in files)
+                    {
+                        string file = fileName.Split('.')[0].ToLower();
+                        PopulateData(file, amount, secondaryAmount);
+                    }
+                }
+                else if (args[0].ToLower() != "reset")
+                {
+                    MessageBox.Show("Populating");
+                    int secondaryAmount = 0;
+                    for (int i = 0; i < args.Length; i += 2)
+                    {
+                        string file = args[i].ToLower();
+                        int amount = int.Parse(args[i + 1]);
+                        try
+                        {
+                            secondaryAmount = int.Parse(args[i + 2]);
+                            i++;
+                        }
+                        catch(Exception ex) { }
+                        PopulateData(file, amount, secondaryAmount);
+                    }
+                }
+            }
+        }
+        private void PopulateData(string file, int amount, int secondaryAmount)
+        {
+            Park park;
+            Attraction attraction;
+            Manufacturer manufacturer;
+            Profile profile;
+            int id;
+            switch (file)
+            {
+                case "attractionrenames":
+                    attraction = Database.attractions.FirstOrDefault();
+                    if (attraction == null)
+                    {
+                        park = Database.parks.FirstOrDefault();
+                        if (park == null)
+                        {
+                            id = Database.GetNextParkID();
+                            park = new Park(id, "Renames Park");
+                            Database.parks.Add(park);
+                        }
+                        attraction = new FlatRide(1, "Renames Attraction", DateOnly.FromDateTime(DateTime.Now), park, null, 1);
+                        park.AddAttraction(attraction);
+                        Database.attractions.Add(attraction);
+                    }
+                    for (int i = 0; i < amount; i++)
+                    {
+                        AttractionRename rename = new AttractionRename(DateOnly.FromDateTime(DateTime.Now), $"TestName - {i + 1}");
+                        attraction.AddRename(rename);
+                    }
+                    break;
+                case "attractions":
+                    park = Database.parks.FirstOrDefault();
+                    if (park == null)
+                    {
+                        park = new Park(1, "Attractions Park");
+                        Database.parks.Add(park);
+                    }
+                    id = Database.GetNextAttractionID();
+                    for (int i = 0; i < amount; i++)
+                    {
+                        attraction = new FlatRide(id + i, $"TestName - {id + i}", DateOnly.FromDateTime(DateTime.Now), park, null, 1);
+                        park.AddAttraction(attraction);
+                        Database.attractions.Add(attraction);
+                    }
+                    break;
+                case "manufacturers":
+                    id = Database.GetNextManufacturerID();
+                    for (int i = 0; i < amount; i++)
+                    {
+                        manufacturer = new Manufacturer(id + i, $"TestName - {id + i}");
+                        Database.manufacturers.Add(manufacturer);
+                    }
+                    break;
+                case "parks":
+                    id = Database.GetNextParkID();
+                    for (int i = 0; i < amount; i++)
+                    {
+                        park = new Park(id + i, $"TestName - {id + i}");
+                        Database.parks.Add(park);
+                    }
+                    break;
+                case "profiles":
+                    id = Database.GetNextProfileID();
+                    for (int i = 0; i < amount; i++)
+                    {
+                        profile = new Profile(id + i, $"TestName - {id + i}", $"testemail{id + i}@email.com", "test", true);
+                        Database.profiles.Add(profile);
+                    }
+                    break;
+                case "ridetypes":
+                    manufacturer = Database.manufacturers.FirstOrDefault();
+                    if (manufacturer == null)
+                    {
+                        manufacturer = new Manufacturer(1, $"RideTypes Manufacturer");
+                        Database.manufacturers.Add(manufacturer);
+                    }
+                    id = Database.GetNextRideTypeID();
+                    for (int i = 0; i < amount; i++)
+                    {
+                        RideType rideType = new RideType(id + i, $"TestName - {id + i}", manufacturer);
+                        manufacturer.AddRideType(rideType);
+                        Database.rideTypes.Add(rideType);
+                    }
+                    break;
+                case "visitattractions":
+                    MessageBox.Show("No dummy data created for 'VisitAttraction'. This is because the same functionality for testing purposes can be achieved with 'Visits'");
+                    break;
+                case "visits":
+                    attraction = Database.attractions.FirstOrDefault();
+                    park = Database.parks.FirstOrDefault();
+                    if (attraction == null)
+                    {
+                        if (park == null)
+                        {
+                            park = new Park(1, "Visits Park");
+                            Database.parks.Add(park);
+                        }
+                        attraction = new FlatRide(1, "Visits Attraction", DateOnly.FromDateTime(DateTime.Now), park, null, 1);
+                        park.AddAttraction(attraction);
+                        Database.attractions.Add(attraction);
+                    }
+                    profile = Database.profiles.FirstOrDefault();
+                    if (profile == null)
+                    {
+                        profile = new Profile(1, "Visit Profile", "profile@email.com", "test", true);
+                        Database.profiles.Add(profile);
+                    }
+                    id = Database.GetNextVisitID();
+                    for (int i = 0; i < amount; i++)
+                    {
+                        Visit visit = new Visit(id + i, DateOnly.FromDateTime(DateTime.Now), profile, park);
+                        Database.visits.Add(visit);
+                        profile.AddVisit(visit);
+                        for (int links = 0; links < secondaryAmount; links++)
+                        {
+                            VisitAttraction visitAttraction = new VisitAttraction(attraction, links + 1, TimeOnly.FromDateTime(DateTime.Now), 100);
+                            visit.AddAttraction(visitAttraction);
+                        }
+                    }
+                    break;
+            }
         }
         private async Task InitializeDataAsync()
         {
