@@ -1371,7 +1371,7 @@ namespace Theme_Park_Tracker
 
             Park park = null;
 
-            // Gets the park, trying for both places that could call this
+            // Gets the Park, trying for both places that could call this
             try
             {
                 Label labelClicked = (Label)sender;
@@ -1553,7 +1553,7 @@ namespace Theme_Park_Tracker
             sender = (object)button;
             EditPark(sender, e);
         }
-        // Edited Until Here
+
         private void manufacturersToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Verifies the user has logged in
@@ -1604,6 +1604,7 @@ namespace Theme_Park_Tracker
 
             Manufacturer manufacturer = null;
 
+            // Gets the Manufacturer, trying for both places that could call this
             try
             {
                 Label labelClicked = (Label)sender;
@@ -1654,6 +1655,7 @@ namespace Theme_Park_Tracker
         }
         public void NewManufacturer(object sender, EventArgs e)
         {
+            // Creates a new Manufacturer with default values
             Manufacturer manufacturer = new Manufacturer(Database.GetNextManufacturerID(), "");
             Button button = (Button)sender;
             button.Tag = manufacturer;
@@ -1677,7 +1679,7 @@ namespace Theme_Park_Tracker
             ViewPanel.Controls.Add(CreateLabel("Name:", null, new Point(14, 14), 10, FontStyle.Regular, null, null));
 
             // Manufacturer name field
-            ViewPanel.Controls.Add(CreateTextBox($"{(manufacturer == null ? "" : manufacturer.GetName())}", null, new Point(65, 12), 200, false));
+            ViewPanel.Controls.Add(CreateTextBox($"{(manufacturer == null ? "" : manufacturer.GetName())}", "Name", new Point(65, 12), 200, false));
 
             if (Database.manufacturers.Contains(manufacturer))
             {
@@ -1688,6 +1690,7 @@ namespace Theme_Park_Tracker
 
                 foreach (RideType rideType in manufacturer.GetRideTypes())
                 {
+                    // Panel for RideTypes linked to the Manufacturer
                     Panel panel = new Panel();
                     panel.BorderStyle = BorderStyle.FixedSingle;
                     panel.Size = new Size(900, 35);
@@ -1698,7 +1701,7 @@ namespace Theme_Park_Tracker
                     panel.Controls.Add(CreateLabel(rideType.GetName(), null, new Point(9, 9), 10, FontStyle.Bold, null, rideType));
 
                     // Removes RideType from Manufacturer
-                    panel.Controls.Add(CreateButton("Delete", new Point(820, 5), RemoveRideTypeFromManufacturer, new Tuple<Manufacturer, RideType>(manufacturer, rideType)));
+                    panel.Controls.Add(CreateButton("Delete", new Point(820, 5), RemoveRideTypeFromManufacturer, rideType));
 
                     location += 40;
                 }
@@ -1706,11 +1709,15 @@ namespace Theme_Park_Tracker
         }
         public void SaveManufacturer(object sender, EventArgs e)
         {
+            // Gets the Manufacturer being saved
             Button clickedButton = (Button)sender;
             Manufacturer manufacturer = (Manufacturer)clickedButton.Tag;
-            TextBox textBox = (TextBox)ViewPanel.Controls[3];
+
+            // Updates the name
+            TextBox textBox = (TextBox)ViewPanel.Controls.Find("Name", true)[0];
             manufacturer.SetName(textBox.Text);
 
+            // Adds the Manufacturer if it's being created
             if (!Database.manufacturers.Contains(manufacturer))
             {
                 Database.manufacturers.Add(manufacturer);
@@ -1720,12 +1727,15 @@ namespace Theme_Park_Tracker
         }
         public void DeleteManufacturer(object sender, EventArgs e)
         {
+            // Gets the Manufacturer being deleted
             Button button = (Button)sender;
             Manufacturer manufacturer = (Manufacturer)button.Tag;
 
+            // Gets all RideTypes linked to this Manufacturer
             List<RideType> rideTypes = Database.GetRideTypesByManufacturerID(manufacturer.GetID());
             if (rideTypes.Count > 0)
             {
+                // Gets all Attractions which uses a RideType of the selected Manufacturer
                 List<Attraction> attractions = new List<Attraction>();
                 foreach (Attraction attraction in Database.attractions)
                 {
@@ -1735,40 +1745,42 @@ namespace Theme_Park_Tracker
                     }
                 }
 
-                if (attractions.Count > 0)
+                // Asks to confirm delete if there are RideTypes and/or Attractions associated with the Manufacturer
+                DialogResult confirmResult = MessageBox.Show($"This will{(rideTypes.Count > 0 ? $"\n- Delete {rideTypes.Count} Ride Type{(rideTypes.Count == 0 ? "" : "s")}" : "")}{(attractions.Count > 0 ? $"\n- Reset the ride type of {attractions.Count} ride{(attractions.Count == 0 ? "" : "s")}" : "")}\n\nAre you sure you want to delete the manufacturer {manufacturer.GetName()}?", "Confirm Delete", MessageBoxButtons.YesNo);
+                if (confirmResult == DialogResult.Yes)
                 {
-                    DialogResult confirmResult = MessageBox.Show($"This will{(rideTypes.Count > 0 ? $"\n- Delete {rideTypes.Count} Ride Type{(rideTypes.Count == 0 ? "" : "s")}" : "")}{(attractions.Count > 0 ? $"\n- Reset the ride type of {attractions.Count} ride{(attractions.Count == 0 ? "" : "s")}" : "")}\n\nAre you sure you want to delete the manufacturer {manufacturer.GetName()}?", "Confirm Delete", MessageBoxButtons.YesNo);
-                    if (confirmResult == DialogResult.Yes)
+                    // Removes the Manufacturer, RideTypes, and resets the RideType of relevant attractions
+                    Database.manufacturers.Remove(manufacturer);
+                    foreach (RideType rideType in rideTypes)
                     {
-                        Database.manufacturers.Remove(manufacturer);
-                        foreach (RideType rideType in rideTypes)
-                        {
-                            Database.rideTypes.Remove(rideType);
-                        }
-                        foreach (Attraction attraction in attractions)
-                        {
-                            attraction.SetRideType(null);
-                        }
+                        Database.rideTypes.Remove(rideType);
+                    }
+                    foreach (Attraction attraction in attractions)
+                    {
+                        attraction.SetRideType(null);
                     }
                 }
-                else
-                {
-                    Database.manufacturers.Remove(manufacturer);
-                }
+            }
+            else
+            {
+                // If there are no associated RideTypes, the Manufacturer can be deleted without affecting anything else
+                Database.manufacturers.Remove(manufacturer);
             }
 
             LoadManufacturers();
         }
         public void RemoveRideTypeFromManufacturer(object sender, EventArgs e)
         {
+            // Gets the RideType and it's Manufacturer
             Button button = (Button)sender;
-            Tuple<Manufacturer, RideType> tuple = (Tuple<Manufacturer, RideType>)button.Tag;
+            RideType rideType = (RideType)button.Tag;
+            Manufacturer manufacturer = rideType.GetManufacturer();
 
-            Manufacturer manufacturer = tuple.Item1;
-            RideType rideType = tuple.Item2;
+            // Removes references to the RideType, leaving it to be removed and not saved
             manufacturer.RemoveRideType(rideType);
             Database.rideTypes.Remove(rideType);
 
+            // Reloads the Manufacturers edit page
             button.Tag = manufacturer;
             sender = (object)button;
             EditManufacturer(sender, e);
@@ -1851,6 +1863,7 @@ namespace Theme_Park_Tracker
             Attraction attraction = null;
             bool edit = false;
 
+            // Gets the Attraction, trying for both places that could call this
             try
             {
                 Label clickedLabel = (Label)sender;
@@ -1874,6 +1887,7 @@ namespace Theme_Park_Tracker
         }
         public void NewRide(object sender, EventArgs e)
         {
+            // Creates a new Attraction with default values
             Button buttonClicked = (Button)sender;
             Rollercoaster rollercoaster = new Rollercoaster(Database.GetNextAttractionID(), "", DateOnly.FromDateTime(DateTime.Now), (Park)buttonClicked.Tag, null, 0, 0, 0);
             buttonClicked.Tag = rollercoaster;
@@ -1897,7 +1911,7 @@ namespace Theme_Park_Tracker
             ViewPanel.Controls.Add(CreateLabel("Name:", null, new Point(14, 14), 10, FontStyle.Regular, null, null));
 
             // Name field
-            ViewPanel.Controls.Add(CreateTextBox($"{(attraction == null ? "" : attraction.GetName(DateOnly.FromDateTime(DateTime.Now)))}", null, new Point(115, 12), 200, false));
+            ViewPanel.Controls.Add(CreateTextBox($"{(attraction == null ? "" : attraction.GetName(DateOnly.FromDateTime(DateTime.Now)))}", "Name", new Point(115, 12), 200, false));
 
             // "Ride Model" text
             ViewPanel.Controls.Add(CreateLabel("Ride Model:", null, new Point(14, 35), 10, FontStyle.Regular, null, null));
@@ -1922,6 +1936,7 @@ namespace Theme_Park_Tracker
             comboBox.SelectedIndex = index;
             comboBox.Location = new Point(115, 33);
             comboBox.Size = new Size(200, 10);
+            comboBox.Name = "RideTypes";
             ViewPanel.Controls.Add(comboBox);
 
             // "Ride Type" label
@@ -1935,6 +1950,7 @@ namespace Theme_Park_Tracker
             comboBox.Location = new Point(115, 54);
             comboBox.Size = new Size(200, 10);
             comboBox.Tag = attraction;
+            comboBox.Name = "Types";
             ViewPanel.Controls.Add(comboBox);
 
             if (attraction != null) comboBox.SelectedIndex = int.Parse(attraction.GetElements()[0]) - 1;
@@ -1946,11 +1962,13 @@ namespace Theme_Park_Tracker
             // Opening Date
             DateTimePicker timePicker = new DateTimePicker();
             timePicker.Location = new Point(115, 75);
+            timePicker.Name = "OpeningDate";
             ViewPanel.Controls.Add(timePicker);
 
             // Add Rename button
             ViewPanel.Controls.Add(CreateButton("Add Rename", new Point(14, 124), RenameClicked, null));
 
+            // Displays all renames if they exist
             foreach (AttractionRename rename in attraction.GetRenames())
             {
                 clickedButton.Tag = rename;
@@ -1961,6 +1979,7 @@ namespace Theme_Park_Tracker
         }
         public void TypeChanged(object sender, EventArgs e)
         {
+            // Updates the class if the Attractions type is changed
             ComboBox comboBox = (ComboBox)sender;
             Attraction attraction = (Attraction)comboBox.Tag;
             int index = comboBox.SelectedIndex;
@@ -1983,8 +2002,10 @@ namespace Theme_Park_Tracker
         }
         public void OutputTypeDetails(Attraction attraction, bool updated)
         {
+            // If it's being updated, it needs to remove the type data that is already there
             if (updated)
             {
+                // Labels, so will exist for all 3 types
                 object[] labels = Controls.Find("TypeBased", true);
                 foreach (object labelEdit in labels)
                 {
@@ -1992,6 +2013,7 @@ namespace Theme_Park_Tracker
                     ViewPanel.Controls.Remove(labelToRemove);
                 }
 
+                // Input fields
                 string[] numerics = { "TrackLength", "TopSpeed", "Inversions" };
                 foreach (string numeric in numerics)
                 {
@@ -2030,12 +2052,16 @@ namespace Theme_Park_Tracker
             string[] items = null;
             string selectedItem = "";
             ComboBox comboBox;
+
+            // Creates different controls for each type
             switch (attraction.GetElements()[0])
             {
+                // Tracked Ride -> Rollercoaster
                 case "1":
                     // "Track Length" text
                     ViewPanel.Controls.Add(CreateLabel("Track Length (metres):", "TypeBased", new Point(500, 25), 10, FontStyle.Regular, null, null));
 
+                    // Track Length NumericUpDown
                     numericUpDown = new NumericUpDown();
                     numericUpDown.Location = new Point(700, 23);
                     numericUpDown.Width = 100;
@@ -2047,6 +2073,7 @@ namespace Theme_Park_Tracker
                     // "Top Speed" text
                     ViewPanel.Controls.Add(CreateLabel("Top Speed (mph):", "TypeBased", new Point(500, 46), 10, FontStyle.Regular, null, null));
 
+                    // Top Speed NumericUpDown
                     numericUpDown = new NumericUpDown();
                     numericUpDown.Location = new Point(700, 44);
                     numericUpDown.Width = 100;
@@ -2056,8 +2083,9 @@ namespace Theme_Park_Tracker
                     ViewPanel.Controls.Add(numericUpDown);
 
                     // "Inversions" text
-                    ViewPanel.Controls.Add(CreateLabel("Top Speed (mph):", "TypeBased", new Point(500, 67), 10, FontStyle.Regular, null, null));
+                    ViewPanel.Controls.Add(CreateLabel("Inversions:", "TypeBased", new Point(500, 67), 10, FontStyle.Regular, null, null));
 
+                    // Inversions NumericUpDown
                     numericUpDown = new NumericUpDown();
                     numericUpDown.Location = new Point(700, 65);
                     numericUpDown.Width = 100;
@@ -2067,10 +2095,13 @@ namespace Theme_Park_Tracker
                     ViewPanel.Controls.Add(numericUpDown);
 
                     break;
+
+                // Tracked Ride -> Dark Ride
                 case "2":
                     // "Track Length" text
                     ViewPanel.Controls.Add(CreateLabel("Track Length (metres):", "TypeBased", new Point(500, 25), 10, FontStyle.Regular, null, null));
 
+                    // Track Length NumericUpDown
                     numericUpDown = new NumericUpDown();
                     numericUpDown.Location = new Point(700, 33);
                     numericUpDown.Width = 100;
@@ -2082,6 +2113,7 @@ namespace Theme_Park_Tracker
                     // "Type" text
                     ViewPanel.Controls.Add(CreateLabel("Type:", "TypeBased", new Point(500, 25), 10, FontStyle.Regular, null, null));
 
+                    // Type ComboBox
                     comboBox = new ComboBox();
                     comboBox.Location = new Point(700, 54);
                     items = new string[] { "Omnimover", "Trackless", "Boat", "Other" };
@@ -2099,10 +2131,13 @@ namespace Theme_Park_Tracker
                     ViewPanel.Controls.Add(comboBox);
 
                     break;
+
+                // Flat Ride
                 case "3":
                     // "Type" text
                     ViewPanel.Controls.Add(CreateLabel("Type:", "TypeBased", new Point(500, 25), 10, FontStyle.Regular, null, null));
 
+                    // Type ComboBox
                     comboBox = new ComboBox();
                     comboBox.Location = new Point(700, 44);
                     items = new string[] { "Pendulum", "Rotation", "Tower", "Other" };
@@ -2124,12 +2159,16 @@ namespace Theme_Park_Tracker
         }
         public void SaveRide(object sender, EventArgs e)
         {
+            // Gets the Attraction being saved
             Button clickedButton = (Button)sender;
             Attraction attraction = (Attraction)clickedButton.Tag;
-            TextBox textBox = (TextBox)ViewPanel.Controls[3];
+
+            // Updates the Attractions name
+            TextBox textBox = (TextBox)ViewPanel.Controls.Find("Name", true)[0];
             attraction.SetName(textBox.Text);
 
-            ComboBox comboBox = (ComboBox)ViewPanel.Controls[5];
+            // Gets the RideType
+            ComboBox comboBox = (ComboBox)ViewPanel.Controls.Find("RideTypes", true)[0];
             if (comboBox.SelectedItem != "None")
             {
                 attraction.SetRideType(Database.rideTypes[comboBox.SelectedIndex - 1]);
@@ -2139,10 +2178,12 @@ namespace Theme_Park_Tracker
                 attraction.SetRideType(null);
             }
 
-            comboBox = (ComboBox)ViewPanel.Controls[7];
+            // Gets the type
+            comboBox = (ComboBox)ViewPanel.Controls.Find("Types", true)[0];
             attraction.GetPark().RemoveAttraction(attraction);
             Database.attractions.Remove(attraction);
 
+            // Gets the Attraction based on its type
             switch (comboBox.SelectedIndex)
             {
                 case 0:
@@ -2155,21 +2196,24 @@ namespace Theme_Park_Tracker
                     attraction = new FlatRide(attraction.GetID(), attraction.GetOpeningName(), attraction.GetOpeningDate(), attraction.GetPark(), attraction.GetRideType(), int.Parse((((ComboBox)Controls.Find("Type", true)[0]).SelectedIndex + 1).ToString()));
                     break;
             }
+
+            // Adds the Attraction if it's being created
             Database.attractions.Add(attraction);
             attraction.GetPark().AddAttraction(attraction);
 
+            // Gets each rename
             DateTimePicker datePicker;
-
-            if (ViewPanel.Controls.Count > 11)
+            Control[] panels = ViewPanel.Controls.Find("Panel", true);
+            if (panels.Length > 1)
             {
                 List<AttractionRename> renames = new List<AttractionRename>();
-                for (int loop = 11; loop < ViewPanel.Controls.Count; loop++)
+                foreach (Control panelControl in panels)
                 {
                     try
                     {
-                        Panel panel = (Panel)ViewPanel.Controls[loop];
-                        textBox = (TextBox)panel.Controls[1];
-                        datePicker = (DateTimePicker)panel.Controls[3];
+                        Panel panel = (Panel)panelControl;
+                        textBox = (TextBox)panel.Controls.Find("Name", true)[0];
+                        datePicker = (DateTimePicker)panel.Controls.Find("ChangeDate", true)[0];
                         renames.Add(new AttractionRename(DateOnly.FromDateTime(datePicker.Value), textBox.Text));
                     }
                     catch { }
@@ -2177,19 +2221,22 @@ namespace Theme_Park_Tracker
                 attraction.SetRenames(renames);
             }
 
-            datePicker = (DateTimePicker)ViewPanel.Controls[9];
+            // Gets the opening date
+            datePicker = (DateTimePicker)ViewPanel.Controls.Find("OpeningDate", true)[0];
             attraction.SetOpeningDate(DateOnly.FromDateTime(datePicker.Value));
 
+            // Goes back to the view of the Attraction
             clickedButton.Tag = attraction;
             sender = (object)clickedButton;
-
             ViewRideClicked(sender, e);
         }
         public void DeleteRide(object sender, EventArgs e)
         {
+            // Gets the Attraction being deleted
             Button button = (Button)sender;
             Attraction attraction = (Attraction)button.Tag;
 
+            // Get Visits containing this ride
             Park park = attraction.GetPark();
             Dictionary<VisitAttraction, Visit> visitAttractions = new Dictionary<VisitAttraction, Visit>();
             HashSet<Visit> uniqueVisits = new HashSet<Visit>();
@@ -2205,9 +2252,11 @@ namespace Theme_Park_Tracker
                 }
             }
 
+            // Asks to confirm delete if there are Visits associated with the Attraction
             DialogResult confirmResult = MessageBox.Show($"This will\n- Remove this ride from {uniqueVisits.Count} visit{(uniqueVisits.Count == 0 ? "" : "s")}\n\nAre you sure you want to delete the Attraction {attraction.GetName(DateOnly.FromDateTime(DateTime.Now))}?", "Confirm Delete", MessageBoxButtons.YesNo);
             if (confirmResult == DialogResult.Yes)
             {
+                // Deletes the Attraction and removes it from any Visits
                 Database.attractions.Remove(attraction);
                 park.RemoveAttraction(attraction);
                 foreach (KeyValuePair<VisitAttraction, Visit> entry in visitAttractions)
@@ -2217,10 +2266,12 @@ namespace Theme_Park_Tracker
                 }
             }
 
+            // Loads al Rides once removed
             LoadRides("all");
         }
         public void RenameClicked(object sender, EventArgs e)
         {
+            // Gets rename
             AttractionRename rename = null;
             Button clickedButton = (Button)sender;
             try
@@ -2231,23 +2282,27 @@ namespace Theme_Park_Tracker
 
             int before = Controls.Find("TypeBased", true).Count() * 2;
 
+            // Creates Panel for rename
             Panel panel = new Panel();
             panel.BorderStyle = BorderStyle.FixedSingle;
             panel.Size = new Size(900, 35);
             panel.Location = new Point(14, (ViewPanel.Controls.Count - 10 - before) * 40 + 124 + ViewPanel.AutoScrollPosition.Y);
+            panel.Name = "Panel";
             ViewPanel.Controls.Add(panel);
 
             // "Name" text
             panel.Controls.Add(CreateLabel("Name:", null, new Point(9, 9), 10, FontStyle.Bold, null, rename));
 
-            // Rename field
-            panel.Controls.Add(CreateTextBox($"{(rename == null ? "" : rename.GetName())}", null, new Point(59, 5), 200, false));
+            // Name field
+            panel.Controls.Add(CreateTextBox($"{(rename == null ? "" : rename.GetName())}", "Name", new Point(59, 5), 200, false));
 
             // "Change date" text
             panel.Controls.Add(CreateLabel("Change date:", null, new Point(344, 9), 10, FontStyle.Regular, null, null));
 
+            // Change date field
             DateTimePicker timePicker = new DateTimePicker();
             timePicker.Location = new Point(439, 5);
+            timePicker.Name = "ChangeDate";
             panel.Controls.Add(timePicker);
 
             if (rename != null)
@@ -2260,24 +2315,24 @@ namespace Theme_Park_Tracker
         }
         public void DeleteRename(object sender, EventArgs e)
         {
+            // Gets Rename being removed
             Button clickedButton = (Button)sender;
             Panel panel = (Panel)clickedButton.Tag;
             int location = panel.Location.Y;
             ViewPanel.Controls.Remove(panel);
 
-            if (ViewPanel.Controls.Count >= 12)
+            object[] panels = ViewPanel.Controls.Find("Panel", true);
+
+            // Moves all panels up if location below the removed one
+            if (panels.Length > 1)
             {
-                for (int i = 11; i < ViewPanel.Controls.Count; i++)
+                foreach (Control panelControl in panels)
                 {
-                    try
+                    Panel panelCheck = (Panel)panelControl;
+                    if (panelCheck.Location.Y > location)
                     {
-                        Panel panelCheck = (Panel)ViewPanel.Controls[i];
-                        if (panelCheck.Location.Y > location)
-                        {
-                            panelCheck.Location = new Point(panelCheck.Location.X, panelCheck.Location.Y - 40);
-                        }
+                        panelCheck.Location = new Point(panelCheck.Location.X, panelCheck.Location.Y - 40);
                     }
-                    catch { }
                 }
             }
         }
@@ -2334,6 +2389,7 @@ namespace Theme_Park_Tracker
 
             RideType rideType = null;
 
+            // Gets the RideType, trying for both places that could call this
             try
             {
                 Label labelClicked = (Label)sender;
@@ -2357,6 +2413,7 @@ namespace Theme_Park_Tracker
         }
         public void NewRideType(object sender, EventArgs e)
         {
+            // Creates a new RideType with default values
             Button buttonClicked = (Button)sender;
             RideType rideType = new RideType(Database.GetNextRideTypeID(), "", (Manufacturer)buttonClicked.Tag);
             buttonClicked.Tag = rideType;
@@ -2367,6 +2424,7 @@ namespace Theme_Park_Tracker
         {
             ViewPanel.Controls.Clear();
 
+            // Gets RideType being edited
             Button clickedButton = (Button)sender;
             RideType rideType = (RideType)clickedButton.Tag;
 
@@ -2380,28 +2438,35 @@ namespace Theme_Park_Tracker
             ViewPanel.Controls.Add(CreateLabel("Name:", null, new Point(14, 14), 10, FontStyle.Regular, null, null));
 
             // "Name" field
-            ViewPanel.Controls.Add(CreateTextBox($"{(rideType == null ? "" : rideType.GetName())}", null, new Point(100, 12), 200, false));
+            ViewPanel.Controls.Add(CreateTextBox($"{(rideType == null ? "" : rideType.GetName())}", "Name", new Point(100, 12), 200, false));
         }
         public void SaveRideType(object sender, EventArgs e)
         {
+            // Gets RideType being saved
             Button clickedButton = (Button)sender;
             RideType rideType = (RideType)clickedButton.Tag;
-            TextBox textBox = (TextBox)ViewPanel.Controls[3];
+
+            // Updates name
+            TextBox textBox = (TextBox)ViewPanel.Controls.Find("Name", true)[0];
             rideType.SetName(textBox.Text);
 
+            // Adds the RideType if it's being created
             if (!Database.rideTypes.Contains(rideType))
             {
                 Database.rideTypes.Add(rideType);
                 rideType.GetManufacturer().AddRideType(rideType);
             }
 
+            // Returns the details once saved
             ViewRideTypeClicked(sender, e);
         }
         public void DeleteRideType(object sender, EventArgs e)
         {
+            // Gets the RideTpye being deleted
             Button button = (Button)sender;
             RideType rideType = (RideType)button.Tag;
 
+            // Gets all Attractions set to this RideType
             List<Attraction> attractions = new List<Attraction>();
             foreach (Attraction attraction in Database.attractions)
             {
@@ -2411,9 +2476,11 @@ namespace Theme_Park_Tracker
                 }
             }
 
+            // Asks to confirm delete if there are Attactions associated with the RideType
             DialogResult confirmResult = MessageBox.Show($"This will\n- Reset the ride type of {attractions.Count} ride{(attractions.Count == 0 ? "" : "s")}\n\nAre you sure you want to delete the Ride Type {rideType.GetName()}?", "Confirm Delete", MessageBoxButtons.YesNo);
             if (confirmResult == DialogResult.Yes)
             {
+                // Deletes the RideType and removes it from any Attractions
                 Database.rideTypes.Remove(rideType);
                 rideType.GetManufacturer().RemoveRideType(rideType);
 
@@ -2423,6 +2490,7 @@ namespace Theme_Park_Tracker
                 }
             }
 
+            // Loads al RideTypes once removed
             LoadRideTypes();
         }
 
