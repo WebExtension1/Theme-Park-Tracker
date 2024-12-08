@@ -913,7 +913,7 @@ namespace Theme_Park_Tracker
             // You can only add a new visit if there are theme parks tracked
             if (Database.parks.Count > 0)
             {
-                // Creates a new visit with default values
+                // Creates a new Visit with default values
                 Visit visit = new Visit(Database.GetNextVisitID(), DateOnly.FromDateTime(DateTime.Now), Database.profile, Database.parks[0]);
                 Button buttonClicked = (Button)sender;
                 buttonClicked.Tag = visit;
@@ -1004,76 +1004,95 @@ namespace Theme_Park_Tracker
         }
         public void SaveVisit(object sender, EventArgs e)
         {
+            // Getting the visit that needs to be saved
             Button clickedButton = (Button)sender;
             Visit visit = (Visit)clickedButton.Tag;
             clickedButton.Tag = visit;
             sender = (object)clickedButton;
 
+            // Get selected park
             ComboBox comboBox = (ComboBox)ViewPanel.Controls.Find("Park", true)[0];
             visit.SetPark(Database.GetParkByID(comboBox.SelectedIndex + 1));
 
+            // Get selected date
             DateTimePicker datePicker = (DateTimePicker)ViewPanel.Controls.Find("Date", true)[0];
             visit.SetDate(DateOnly.FromDateTime(datePicker.Value));
 
+            // Save each attraction to the visit
             List<VisitAttraction> attractions = new List<VisitAttraction>();
-
             foreach (Panel attractionPanel in ViewPanel.Controls.Find("Panel", true))
             {
-                Attraction attraction = (Attraction)attractionPanel.Controls[0].Tag;
+                // Get the attraction
+                Attraction attraction = (Attraction)attractionPanel.Controls.Find("Attraction", true)[0].Tag;
+
+                // Get the order in the visit
                 int order = ((attractionPanel.Location.Y - 112) / 40) + 1;
+
+                // Get The wait time if selected
                 int waitTime = -1;
-                TimeOnly time = TimeOnly.Parse("3:00:00");
-
-                CheckBox checkBox = (CheckBox)attractionPanel.Controls[3];
-
+                CheckBox checkBox = (CheckBox)attractionPanel.Controls.Find("WaitTimeCheckBox", true)[0];
                 if (checkBox.Checked)
                 {
-                    NumericUpDown numericUpDown = (NumericUpDown)attractionPanel.Controls[2];
+                    NumericUpDown numericUpDown = (NumericUpDown)attractionPanel.Controls.Find("WaitTime", true)[0];
                     waitTime = Convert.ToInt32(Math.Round(numericUpDown.Value, 0));
                 }
 
-                checkBox = (CheckBox)attractionPanel.Controls[6];
-
+                // Get the entry time if selected
+                TimeOnly time = TimeOnly.Parse("3:00:00");
+                checkBox = (CheckBox)attractionPanel.Controls.Find("EntryTimeCheckBox", true)[0];
                 if (checkBox.Checked)
                 {
-                    DateTimePicker dateTimePicker = (DateTimePicker)attractionPanel.Controls[5];
+                    DateTimePicker dateTimePicker = (DateTimePicker)attractionPanel.Controls.Find("EntryTime", true)[0];
                     time = TimeOnly.Parse($"{dateTimePicker.Value.Hour}:{dateTimePicker.Value.Minute}:{dateTimePicker.Value.Second}");
                 }
 
+                // Adds the attraction to the list
                 attractions.Add(new VisitAttraction(attraction, order, time, waitTime));
             }
+
+            // Sets the visits attractions
             visit.SetAttractions(attractions);
 
+            // Checks to see if it needs adding or if it's being updated
             if (!Database.visits.Contains(visit))
             {
                 Database.visits.Add(visit);
                 Database.profile.AddVisit(visit);
             }
-
+            
+            // Returns the details page for this visit
             ViewVisitClicked(sender, e);
-        } // Next
+        }
         public void DeleteVisit(object sender, EventArgs e)
         {
+            // Gets the visit to be deleted
             Button button = (Button)sender;
             Visit visit = (Visit)button.Tag;
 
+            // Asks to confirm this action
             DialogResult confirmResult = MessageBox.Show($"This will permentantly delete this Visit\n\nAre you sure you want to delete this Visit?", "Confirm Delete", MessageBoxButtons.YesNo);
+
+            // If confirmed, delete the data
             if (confirmResult == DialogResult.Yes)
             {
                 Database.visits.Remove(visit);
                 Database.profile.RemoveVisit(visit);
-            }
 
-            LoadVisits(Database.profile, true);
+                // Deletes the visit and returns to a list of all visits
+                LoadVisits(Database.profile, true);
+            }
         }
         public void AttractionClicked(object sender, EventArgs e)
         {
+            // Gets the attraction being clicked
             Attraction attraction = null;
             VisitAttraction visitAttraction = null;
             Button clickedButton = (Button)sender;
+
             bool con = true;
             try
             {
+                // Gets the attraction from a ComboBox if added manually
                 ComboBox comboBox = (ComboBox)clickedButton.Tag;
                 Park park = (Park)comboBox.Tag;
                 List<Attraction> attractions = Database.GetAttractionByPark(park.GetID()).OrderBy(attraction => attraction.GetID()).ToList();
@@ -1083,6 +1102,7 @@ namespace Theme_Park_Tracker
             {
                 try
                 {
+                    // If the ComboBox can't be case, it must be a visit attraction
                     visitAttraction = (VisitAttraction)clickedButton.Tag;
                     attraction = visitAttraction.GetAttraction();
                 }
@@ -1092,8 +1112,10 @@ namespace Theme_Park_Tracker
                 }
             }
 
+            // If the attraction was successfully cast
             if (con)
             {
+                // Creates a panel to display the info of the attraction
                 Panel panel = new Panel();
                 panel.BorderStyle = BorderStyle.FixedSingle;
                 panel.Size = new Size(900, 35);
@@ -1102,22 +1124,27 @@ namespace Theme_Park_Tracker
                 ViewPanel.Controls.Add(panel);
 
                 // Displays attractions name
-                panel.Controls.Add(CreateLabel(attraction.GetName(DateOnly.FromDateTime(DateTime.Now)), null, new Point(9, 9), 10, FontStyle.Bold, null, attraction));
+                panel.Controls.Add(CreateLabel(attraction.GetName(DateOnly.FromDateTime(DateTime.Now)), "Attraction", new Point(9, 9), 10, FontStyle.Bold, null, attraction));
 
                 // "Wait time" text
                 panel.Controls.Add(CreateLabel("Wait time:", null, new Point(239, 9), 10, FontStyle.Regular, null, null));
 
+                // Selects the wait time
                 NumericUpDown numericUpDown = new NumericUpDown();
                 numericUpDown.Location = new Point(309, 5);
                 numericUpDown.Width = 40;
                 numericUpDown.Maximum = 999;
+                numericUpDown.Name = "WaitTime";
                 panel.Controls.Add(numericUpDown);
 
+                // A CheckBox to signify is Wait Time is being used
                 CheckBox checkBox = new CheckBox();
                 checkBox.Location = new Point(359, 6);
                 checkBox.Tag = numericUpDown;
+                checkBox.Name = "WaitTimeCheckBox";
                 panel.Controls.Add(checkBox);
 
+                // Sets wait time if the visit being loaded is already saved to a value
                 if (visitAttraction != null)
                 {
                     if (visitAttraction.GetWaitTime() != -1)
@@ -1130,19 +1157,24 @@ namespace Theme_Park_Tracker
                 // "Entry time" text
                 panel.Controls.Add(CreateLabel("Entry time:", null, new Point(469, 9), 10, FontStyle.Regular, null, null));
 
+                // Selects the entry time
                 DateTimePicker timePicker = new DateTimePicker();
                 timePicker.Format = DateTimePickerFormat.Time;
                 timePicker.Location = new Point(549, 5);
                 timePicker.Width = 67;
                 timePicker.ShowUpDown = true;
+                timePicker.Name = "EntryTime";
                 panel.Controls.Add(timePicker);
 
+                // A CheckBox to signify is Entry Time is being used
                 checkBox = new CheckBox();
                 checkBox.Location = new Point(626, 10);
                 checkBox.Tag = timePicker;
                 checkBox.AutoSize = true;
+                checkBox.Name = "EntryTimeCheckBox";
                 panel.Controls.Add(checkBox);
 
+                // Sets entry time if the visit being loaded is already saved to a value
                 if (visitAttraction != null)
                 {
                     if (visitAttraction.GetTime() != TimeOnly.Parse("3:00:00"))
@@ -1165,16 +1197,25 @@ namespace Theme_Park_Tracker
         }
         public void MoveAttractionUp(object sender, EventArgs e)
         {
+            // Gets parent panel
             Button clickedButton = (Button)sender;
             Panel panel = (Panel)clickedButton.Tag;
             int location = panel.Location.Y;
             location -= 40;
 
-            if (ViewPanel.Controls.Count > 8)
+            // Gets a list of all panels in the form
+            object[] panels = ViewPanel.Controls.Find("Panel", true);
+
+            // Only needs to compare if there are more panels that it could interact with
+            if (panels.Length > 1)
             {
-                for (int i = 8; i < ViewPanel.Controls.Count; i++)
+                // Check position for each panel
+                foreach (Control controlPanel in panels)
                 {
-                    Panel panelCheck = (Panel)ViewPanel.Controls[i];
+                    // Cast the control to a panel
+                    Panel panelCheck = (Panel)controlPanel;
+
+                    // If the panel is in the intended position, swap coordinates
                     if (panelCheck.Location.Y == location)
                     {
                         panelCheck.Location = new Point(panelCheck.Location.X, panelCheck.Location.Y + 40);
@@ -1185,16 +1226,25 @@ namespace Theme_Park_Tracker
         }
         public void MoveAttractionDown(object sender, EventArgs e)
         {
+            // Gets parent panel
             Button clickedButton = (Button)sender;
             Panel panel = (Panel)clickedButton.Tag;
             int location = panel.Location.Y;
             location += 40;
 
-            if (ViewPanel.Controls.Count > 8)
+            // Gets a list of all panels in the form
+            object[] panels = ViewPanel.Controls.Find("Panel", true);
+
+            // Only needs to compare if there are more panels that it could interact with
+            if (panels.Length > 1)
             {
-                for (int i = 8; i < ViewPanel.Controls.Count; i++)
+                // Check position for each panel
+                foreach (Control controlPanel in panels)
                 {
-                    Panel panelCheck = (Panel)ViewPanel.Controls[i];
+                    // Cast the control to a panel
+                    Panel panelCheck = (Panel)controlPanel;
+
+                    // If the panel is in the intended position, swap coordinates
                     if (panelCheck.Location.Y == location)
                     {
                         panelCheck.Location = new Point(panelCheck.Location.X, panelCheck.Location.Y - 40);
@@ -1205,38 +1255,50 @@ namespace Theme_Park_Tracker
         }
         public void DeleteAttraction(object sender, EventArgs e)
         {
+            // Gets parent panel;
             Button clickedButton = (Button)sender;
             Panel panel = (Panel)clickedButton.Tag;
             int location = panel.Location.Y;
+
+            // Removes panel
             ViewPanel.Controls.Remove(panel);
 
-            if (ViewPanel.Controls.Count >= 9)
+            // Gets a list of all panels in the form
+            object[] panels = ViewPanel.Controls.Find("Panel", true);
+
+            // Checks position for each panel
+            foreach (Control controlPanel in panels)
             {
-                for (int i = 8; i < ViewPanel.Controls.Count; i++)
+                // Cast the control to a panel
+                Panel panelCheck = (Panel)controlPanel;
+
+                // If the panel is above the removed one, move it up
+                if (panelCheck.Location.Y > location)
                 {
-                    Panel panelCheck = (Panel)ViewPanel.Controls[i];
-                    if (panelCheck.Location.Y > location)
-                    {
-                        panelCheck.Location = new Point(panelCheck.Location.X, panelCheck.Location.Y - 40);
-                    }
+                    panelCheck.Location = new Point(panelCheck.Location.X, panelCheck.Location.Y - 40);
                 }
             }
         }
         public void ThemeParkChangedOnVisit(object sender, EventArgs e)
         {
+            // Gets the updated park
             ComboBox comboBox = (ComboBox)sender;
             Park selectedPark = Database.GetParkByID(comboBox.SelectedIndex + 1);
             List<Attraction> attractions = Database.GetAttractionByPark(selectedPark.GetID()).OrderBy(attraction => attraction.GetID()).ToList();
 
-            comboBox = (ComboBox)ViewPanel.Controls[6];
+            // Gets the list of attractions
+            comboBox = (ComboBox)ViewPanel.Controls.Find("combo1", true)[0]; 
             Park originalPark = (Park)comboBox.Tag;
-
+            
+            // Checks if the park has changed
             if (selectedPark != originalPark)
             {
+                // Clears the list
                 comboBox.Items.Clear();
                 comboBox.Tag = selectedPark;
                 if (attractions.Count > 0)
                 {
+                    // Puts each ride in the park into the ComboBox
                     foreach (Attraction attraction in attractions)
                     {
                         comboBox.Items.Add(attraction.GetName(DateOnly.FromDateTime(DateTime.Now)));
@@ -1245,10 +1307,12 @@ namespace Theme_Park_Tracker
                 }
                 else
                 {
+                    // Makes sure a previous ride isn't left displayed in there
                     comboBox.Items.Add("");
                     comboBox.SelectedIndex = 0;
                 }
 
+                // Removes all rides currently in the visit
                 object[] controls = Controls.Find("Panel", true);
                 foreach (object control in controls)
                 {
@@ -1260,6 +1324,7 @@ namespace Theme_Park_Tracker
 
         private void themeParksToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            // Verifies the user has logged in
             if (Database.profile != null)
             {
                 LoadThemeParks();
@@ -1306,6 +1371,7 @@ namespace Theme_Park_Tracker
 
             Park park = null;
 
+            // Gets the park, trying for both places that could call this
             try
             {
                 Label labelClicked = (Label)sender;
@@ -1337,8 +1403,8 @@ namespace Theme_Park_Tracker
 
             if (park.GetAttractions() != null)
             {
+                // Outputs a list of all Attractions tracked to the selected Park
                 List<Attraction> attractions = park.GetAttractions().OrderBy(attraction => attraction.GetName(DateOnly.FromDateTime(DateTime.Now))).ToList();
-
                 foreach (Attraction attraction in attractions)
                 {
                     // Displays Attraction name
@@ -1359,6 +1425,7 @@ namespace Theme_Park_Tracker
         }
         public void NewPark(object sender, EventArgs e)
         {
+            // Creates a new Park with default values
             Park park = new Park(Database.GetNextParkID(), "");
             Button button = (Button)sender;
             button.Tag = park;
@@ -1382,7 +1449,7 @@ namespace Theme_Park_Tracker
             ViewPanel.Controls.Add(CreateLabel("Name:", null, new Point(14, 14), 10, FontStyle.Regular, null, null));
 
             // Park name field
-            ViewPanel.Controls.Add(CreateTextBox($"{(park == null ? "" : park.GetName())}", null, new Point(65, 12), 200, false));
+            ViewPanel.Controls.Add(CreateTextBox($"{(park == null ? "" : park.GetName())}", "Name", new Point(65, 12), 200, false));
 
             if (Database.parks.Contains(park))
             {
@@ -1391,8 +1458,10 @@ namespace Theme_Park_Tracker
 
                 int location = 80;
 
+                // Displays all Attractions tracked to the Park
                 foreach (Attraction attraction in park.GetAttractions())
                 {
+                    // Panel for the Attraction
                     Panel panel = new Panel();
                     panel.BorderStyle = BorderStyle.FixedSingle;
                     panel.Size = new Size(900, 35);
@@ -1403,7 +1472,7 @@ namespace Theme_Park_Tracker
                     panel.Controls.Add(CreateLabel(attraction.GetName(DateOnly.FromDateTime(DateTime.Now)), null, new Point(9, 9), 10, FontStyle.Bold, null, attraction));
 
                     // Delete Attraction button
-                    panel.Controls.Add(CreateButton("Delete", new Point(820, 5), RemoveRideFromPark, new Tuple<Park, Attraction>(park, attraction)));
+                    panel.Controls.Add(CreateButton("Delete", new Point(820, 5), RemoveRideFromPark, attraction));
 
                     location += 40;
                 }
@@ -1416,10 +1485,15 @@ namespace Theme_Park_Tracker
         }
         public void SavePark(object sender, EventArgs e)
         {
+            // Gets Park being saved
             Button clickedButton = (Button)sender;
             Park park = (Park)clickedButton.Tag;
-            TextBox textBox = (TextBox)ViewPanel.Controls[3];
+
+            // Updates name
+            TextBox textBox = (TextBox)ViewPanel.Controls.Find("Name", true)[0];
             park.SetName(textBox.Text);
+
+            // Adds the park if it is being created
             if (!Database.parks.Contains(park))
             {
                 Database.parks.Add(park);
@@ -1429,16 +1503,21 @@ namespace Theme_Park_Tracker
         }
         public void DeletePark(object sender, EventArgs e)
         {
+            // Gets the Park being deleted
             Button button = (Button)sender;
             Park park = (Park)button.Tag;
 
+            // Gets associated data
             List<Attraction> attractions = Database.GetAttractionByPark(park.GetID());
             List<Visit> visits = Database.GetVisitsByParkID(park.GetID());
+
             if (attractions.Count > 0 || visits.Count > 0)
             {
+                // Asks to confirm delete if there are Visits and/or Attractions associated with the Park
                 DialogResult confirmResult = MessageBox.Show($"This will\n- Delete {attractions.Count} Attraction{(attractions.Count > 0 ? "s" : "")}\n- Delete {visits.Count} Visit{(visits.Count > 0 ? "s" : "")}\n\nAre you sure you want to delete the Park {park.GetName()}?", "Confirm Delete", MessageBoxButtons.YesNo);
                 if (confirmResult == DialogResult.Yes)
                 {
+                    // Removes park and it's associated data
                     Database.parks.Remove(park);
                     foreach (Attraction attraction in attractions)
                     {
@@ -1446,12 +1525,14 @@ namespace Theme_Park_Tracker
                     }
                     foreach (Visit visit in visits)
                     {
+                        // VistAttractions are refered to in Visit, so are deleted along with the visit
                         Database.visits.Remove(visit);
                     }
                 }
             }
             else
             {
+                // Deletes it without asking if there is no associated data
                 Database.parks.Remove(park);
             }
 
@@ -1459,11 +1540,12 @@ namespace Theme_Park_Tracker
         }
         public void RemoveRideFromPark(object sender, EventArgs e)
         {
+            // Gets the Attraction and Park
             Button button = (Button)sender;
-            Tuple<Park, Attraction> tuple = (Tuple<Park, Attraction>)button.Tag;
+            Attraction attraction = (Attraction)button.Tag;
+            Park park = attraction.GetPark();
 
-            Park park = tuple.Item1;
-            Attraction attraction = tuple.Item2;
+            // Removes the Ride, leaving it unreferenced to be removed and not saved
             park.RemoveAttraction(attraction);
             Database.attractions.Remove(attraction);
 
@@ -1471,9 +1553,10 @@ namespace Theme_Park_Tracker
             sender = (object)button;
             EditPark(sender, e);
         }
-
+        // Edited Until Here
         private void manufacturersToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            // Verifies the user has logged in
             if (Database.profile != null)
             {
                 LoadManufacturers();
@@ -1693,6 +1776,7 @@ namespace Theme_Park_Tracker
 
         private void ridesToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            // Verifies the user has logged in
             if (Database.profile != null)
             {
                 LoadRides("all");
@@ -1700,6 +1784,7 @@ namespace Theme_Park_Tracker
         }
         private void flatRidesToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            // Verifies the user has logged in
             if (Database.profile != null)
             {
                 LoadRides("3");
@@ -1707,6 +1792,7 @@ namespace Theme_Park_Tracker
         }
         private void rollercoastersToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            // Verifies the user has logged in
             if (Database.profile != null)
             {
                 LoadRides("1");
@@ -1714,6 +1800,7 @@ namespace Theme_Park_Tracker
         }
         private void darkRidesToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            // Verifies the user has logged in
             if (Database.profile != null)
             {
                 LoadRides("2");
@@ -2197,6 +2284,7 @@ namespace Theme_Park_Tracker
 
         private void rideTypesToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            // Verifies the user has logged in
             if (Database.profile != null)
             {
                 LoadRideTypes();

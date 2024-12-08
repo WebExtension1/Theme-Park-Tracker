@@ -109,7 +109,7 @@ namespace Theme_Park_Tracker
             selectedRideTypes = rideTypes.Where(rideType => rideType.GetManufacturer().GetID() == id).ToList();
             //long nonParallel = stopwatch.ElapsedMilliseconds;
 
-            //// Create a the global variable "first" and set it to 0 to avoid this message trying to pop up possible millions of times
+            //// Create a global variable "first" and set it to 0 to avoid this message trying to pop up possibly millions of times
             //if (first == 0) MessageBox.Show($"Parallel: {parallel}\nNot Parallel: {nonParallel}");
             //first = 1;
 
