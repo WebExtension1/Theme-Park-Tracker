@@ -767,9 +767,10 @@ namespace Theme_Park_Tracker
                 ViewPanel.Controls.Add(CreateLabel("No activity from other users!", null, new Point(50, 317), 10, FontStyle.Regular, null, null));
             }
         }
-        // Got to here
+
         private void visitsToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            // Verifies the user has logged in
             if (Database.profile != null)
             {
                 LoadVisits(Database.profile, true);
@@ -781,6 +782,7 @@ namespace Theme_Park_Tracker
 
             int location = 14;
 
+            // Edit is true if the visit belongs to the logged in user
             if (edit)
             {
                 // New Visit button
@@ -794,8 +796,7 @@ namespace Theme_Park_Tracker
                 foreach (Visit visit in profile.GetVisits())
                 {
                     // Visit info with view route
-                    Tuple<Visit, bool> tuple = Tuple.Create(visit, edit);
-                    ViewPanel.Controls.Add(CreateLabel($"{visit.GetPark().GetName()} - {visit.GetDate()}", null, new Point(14, location), 20, FontStyle.Regular, ViewVisitClicked, tuple));
+                    ViewPanel.Controls.Add(CreateLabel($"{visit.GetPark().GetName()} - {visit.GetDate()}", null, new Point(14, location), 20, FontStyle.Regular, ViewVisitClicked, visit));
 
                     // Visit summary
                     ViewPanel.Controls.Add(CreateLabel($"-- {visit.GetAttractionCount()} Ride{(visit.GetAttractionCount() == 1 ? "" : "s")} -- {visit.GetUniqueAttractionCount()} Unique Ride{(visit.GetUniqueAttractionCount() == 1 ? "" : "s")} --", null, new Point(1000, location + 8), 10, FontStyle.Regular, null, null));
@@ -830,27 +831,27 @@ namespace Theme_Park_Tracker
             Visit visit = null;
             bool edit = false;
 
+            // Visit can be reached through clicking to view, and by saving the details
+            // So it needs to be able to get the visit from either
             try
             {
                 Label clickedLabel = (Label)sender;
-                Tuple<Visit, bool> tuple = (Tuple<Visit, bool>)clickedLabel.Tag;
-                visit = (Visit)tuple.Item1;
-                edit = (bool)tuple.Item2;
+                visit = (Visit)clickedLabel.Tag;
             }
             catch
             {
-                try
-                {
-                    Button clickedButton = (Button)sender;
-                    Tuple<Visit, bool> tuple = (Tuple<Visit, bool>)clickedButton.Tag;
-                    visit = (Visit)tuple.Item1;
-                    edit = (bool)tuple.Item2;
-                }
-                catch { }
+                Button clickedButton = (Button)sender;
+                visit = (Visit)clickedButton.Tag;
             }
 
-            Label label;
+            // Finds if the visit belongs to the logged in user
+            edit = false;
+            if (visit.GetProfile() == Database.profile)
+            {
+                edit = true;
+            }
 
+            // Edit is true if the visit belongs to the logged in user
             if (edit)
             {
                 // Button to edit visit details
@@ -886,6 +887,8 @@ namespace Theme_Park_Tracker
                     // Partition between Rides
                     ViewPanel.Controls.Add(CreatePartition(location - 10));
                 }
+
+                // Gets wait time info
                 int waitTime = attraction.GetWaitTime();
                 int hours = waitTime / 60, minutes = waitTime % 60;
                 if (waitTime != -1)
@@ -894,6 +897,7 @@ namespace Theme_Park_Tracker
                     ViewPanel.Controls.Add(CreateLabel($"Wait Time: {(hours != 0 ? $"{hours} hour{(hours == 1 ? "" : "s")}" : "")}{(hours != 0 && minutes != 0 ? " and " : "")}{(((minutes != -1 && hours == 0) || minutes != 0) ? $"{minutes} minute{(minutes == 1 ? "" : "s")}" : "")}", null, new Point(300, location + 2), 10, FontStyle.Regular, null, null));
                 }
 
+                // Displays wait time info
                 TimeOnly time = attraction.GetTime();
                 if (time != TimeOnly.Parse("3:00 am"))
                 {
@@ -906,8 +910,10 @@ namespace Theme_Park_Tracker
         }
         private void NewVisit(object sender, EventArgs e)
         {
-            if (Database.attractions.Count > 0)
+            // You can only add a new visit if there are theme parks tracked
+            if (Database.parks.Count > 0)
             {
+                // Creates a new visit with default values
                 Visit visit = new Visit(Database.GetNextVisitID(), DateOnly.FromDateTime(DateTime.Now), Database.profile, Database.parks[0]);
                 Button buttonClicked = (Button)sender;
                 buttonClicked.Tag = visit;
@@ -916,7 +922,7 @@ namespace Theme_Park_Tracker
             }
             else
             {
-                MessageBox.Show("Please add attractions to a theme park before logging a visit");
+                MessageBox.Show("Please add a theme park");
             }
         }
         private void EditVisit(object sender, EventArgs e)
@@ -935,6 +941,7 @@ namespace Theme_Park_Tracker
             // "Theme Park" text
             ViewPanel.Controls.Add(CreateLabel("Theme Park:", null, new Point(14, 14), 10, FontStyle.Regular, null, null));
 
+            // ComboBox to display a list of theme parks
             ComboBox comboBox = new ComboBox();
             Database.parks.OrderBy(park => park.GetName());
             foreach (Park park in Database.parks)
@@ -957,6 +964,7 @@ namespace Theme_Park_Tracker
             // "Date" text
             ViewPanel.Controls.Add(CreateLabel("Date:", null, new Point(14, 35), 10, FontStyle.Regular, null, null));
 
+            // DateTimePicker to pick the date of the visit
             DateTimePicker datePicker = new DateTimePicker();
             datePicker.Location = new Point(105, 33);
             if (visit != null)
@@ -966,9 +974,10 @@ namespace Theme_Park_Tracker
             datePicker.Name = "Date";
             ViewPanel.Controls.Add(datePicker);
 
+            // ComboBox to show attractions in that park
             int selectedPark = comboBox.SelectedIndex;
-            comboBox = new ComboBox();
             List<Attraction> attractions = Database.GetAttractionByPark(Database.GetParkByID(selectedPark + 1).GetID()).OrderBy(attraction => attraction.GetID()).ToList();
+            comboBox = new ComboBox();
             foreach (Attraction attraction in attractions)
             {
                 comboBox.Items.Add(attraction.GetName(DateOnly.FromDateTime(DateTime.Now)));
@@ -997,8 +1006,7 @@ namespace Theme_Park_Tracker
         {
             Button clickedButton = (Button)sender;
             Visit visit = (Visit)clickedButton.Tag;
-            Tuple<Visit, bool> tuple = new Tuple<Visit, bool>(visit, true);
-            clickedButton.Tag = tuple;
+            clickedButton.Tag = visit;
             sender = (object)clickedButton;
 
             ComboBox comboBox = (ComboBox)ViewPanel.Controls.Find("Park", true)[0];
@@ -1043,7 +1051,7 @@ namespace Theme_Park_Tracker
             }
 
             ViewVisitClicked(sender, e);
-        }
+        } // Next
         public void DeleteVisit(object sender, EventArgs e)
         {
             Button button = (Button)sender;
