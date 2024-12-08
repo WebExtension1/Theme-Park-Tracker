@@ -147,12 +147,16 @@ namespace Theme_Park_Tracker
             Profile checkProfile = GetProfileByUsername(username);
             if (checkProfile != null && create)
             {
-                errors.Add("Username already exists");
+                bool loggedIn = false;
+                if (checkProfile == profile) loggedIn = true;
+                if (!loggedIn) errors.Add("Username already exists");
             }
             checkProfile = GetProfileByEmail(email);
             if (checkProfile != null && create)
             {
-                errors.Add("Email already exists");
+                bool loggedIn = false;
+                if (checkProfile == profile) loggedIn = true;
+                if (!loggedIn) errors.Add("Email already exists");
             }
 
             // Checks Email is in a correct format

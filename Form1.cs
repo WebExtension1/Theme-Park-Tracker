@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace Theme_Park_Tracker
 {
@@ -668,6 +669,7 @@ namespace Theme_Park_Tracker
                 // "Other Users" label for list of other users
                 ViewPanel.Controls.Add(CreateLabel("Other Users", null, new Point(14, 260), 15, FontStyle.Regular, null, null));
 
+                // Left as serial as the systems scope would not make sense for an amount of users that is necessary for parallel to be more efficient
                 int location = 290;
                 foreach (Profile profile in Database.profiles)
                 {
@@ -750,16 +752,43 @@ namespace Theme_Park_Tracker
             if (otherVisits.Count() > 0)
             {
                 int location = 90;
-                foreach (Visit visit in otherVisits)
+
+                List<Control> controls = new List<Control>();
+                object lockObj = new object();
+
+                // Parallel loops through each Visit
+                Parallel.ForEach(otherVisits, visit =>
                 {
+                    Control profileLabel, summaryLabel;
+                    int thisLocation;
+
+                    // This locks this object, pausing all other threads that reach this point, allowing the shared location variable to be processed properly
+                    lock (lockObj)
+                    {
+                        thisLocation = location;
+                        location += 65;
+                    }
+
                     // Visitor and park
-                    ViewPanel.Controls.Add(CreateLabel($"{visit.GetProfile().GetUsername()} visited {visit.GetPark().GetName()} on {visit.GetDate()}", null, new Point(20, location), 15, FontStyle.Regular, null, null));
+                    profileLabel= CreateLabel($"{visit.GetProfile().GetUsername()} visited {visit.GetPark().GetName()} on {visit.GetDate()}", null, new Point(20, thisLocation), 15, FontStyle.Regular, null, null);
 
                     // Visit activity
-                    ViewPanel.Controls.Add(CreateLabel($"They got on {visit.GetAttractionCount()} ride{(visit.GetAttractionCount() == 1 ? "" : "s")}", null, new Point(20, location + 25), 10, FontStyle.Regular, null, null));
+                    summaryLabel = CreateLabel($"They got on {visit.GetAttractionCount()} ride{(visit.GetAttractionCount() == 1 ? "" : "s")}", null, new Point(20, thisLocation + 25), 10, FontStyle.Regular, null, null);
 
-                    location += 65;
-                }
+                    // Add controls to the list of controls to be added
+                    lock (lockObj)
+                    {
+                        controls.Add(profileLabel);
+                        controls.Add(summaryLabel);
+                    }
+                });
+
+                // Add all controls
+                Invoke(() =>
+                {
+                    // AddRange allows them to be added in bulk for further optimisation
+                    ViewPanel.Controls.AddRange(controls.ToArray());
+                });
             }
             else
             {
@@ -793,22 +822,87 @@ namespace Theme_Park_Tracker
 
             if (Database.visits.Count > 0)
             {
-                foreach (Visit visit in profile.GetVisits())
+                // Parallel was quicker so I wanted to include it, but the location variable being shared was an issue, so I found this solution using lock
+
+                List<Control> controls = new List<Control>();
+                object lockObj = new object();
+
+                // Parallel loops through each Visit
+                Parallel.ForEach(profile.GetVisits(), visit =>
                 {
-                    // Visit info with view route
-                    ViewPanel.Controls.Add(CreateLabel($"{visit.GetPark().GetName()} - {visit.GetDate()}", null, new Point(14, location), 20, FontStyle.Regular, ViewVisitClicked, visit));
+                    Control parkLabel, summaryLabel, partition = null;
+                    int thisLocation;
 
-                    // Visit summary
-                    ViewPanel.Controls.Add(CreateLabel($"-- {visit.GetAttractionCount()} Ride{(visit.GetAttractionCount() == 1 ? "" : "s")} -- {visit.GetUniqueAttractionCount()} Unique Ride{(visit.GetUniqueAttractionCount() == 1 ? "" : "s")} --", null, new Point(1000, location + 8), 10, FontStyle.Regular, null, null));
-
-                    if (location != 14 && location != 74)
+                    // This locks this object, pausing all other threads that reach this point, allowing the shared location variable to be processed properly
+                    lock (lockObj)
                     {
-                        // Partition between Visits
-                        ViewPanel.Controls.Add(CreatePartition(location - 10));
+                        thisLocation = location;
+                        location += 50;
                     }
 
-                    location += 50;
-                }
+                    // Visit info with view route
+                    parkLabel = CreateLabel($"{visit.GetPark().GetName()} - {visit.GetDate()}", null, new Point(14, thisLocation), 20, FontStyle.Regular, ViewVisitClicked, visit);
+
+                    // Visit summary
+                    summaryLabel = CreateLabel($"-- {visit.GetAttractionCount()} Ride{(visit.GetAttractionCount() == 1 ? "" : "s")} -- {visit.GetUniqueAttractionCount()} Unique Ride{(visit.GetUniqueAttractionCount() == 1 ? "" : "s")} --", null, new Point(1000, thisLocation + 8), 10, FontStyle.Regular, null, null);
+                    
+                    if (thisLocation != 14 && thisLocation != 74)
+                    {
+                        // Partition between Visits
+                        partition = CreatePartition(thisLocation - 10);
+                    }
+
+                    // Add controls to the list of controls to be added
+                    lock (lockObj)
+                    {
+                        controls.Add(parkLabel);
+                        controls.Add(summaryLabel);
+                        if (partition != null) controls.Add(partition);
+                    }
+                });
+
+                // Add all controls
+                Invoke(() =>
+                {
+                    // AddRange allows them to be added in bulk for further optimisation
+                    ViewPanel.Controls.AddRange(controls.ToArray());
+                });
+
+
+                // TESTS
+                //
+                // At 1,000 Visits
+                // Parallel: 7937
+                // Serial: 11749
+                //
+                // At 100 Visits
+                // Parallel: 335
+                // Serial: 440
+                //
+                // At 10 Visits
+                // Parallel: 43
+                // Serial: 40
+                //
+                // Conclusion: Serial is only efficient at very small values, so I'll keep outputs like this as Parallel
+                // The commented code below is what I used for the Serial test
+                //
+
+                //foreach (Visit visit in profile.GetVisits())
+                //{
+                //    // Visit info with view route
+                //    ViewPanel.Controls.Add(CreateLabel($"{visit.GetPark().GetName()} - {visit.GetDate()}", null, new Point(14, location), 20, FontStyle.Regular, ViewVisitClicked, visit));
+
+                //    // Visit summary
+                //    ViewPanel.Controls.Add(CreateLabel($"-- {visit.GetAttractionCount()} Ride{(visit.GetAttractionCount() == 1 ? "" : "s")} -- {visit.GetUniqueAttractionCount()} Unique Ride{(visit.GetUniqueAttractionCount() == 1 ? "" : "s")} --", null, new Point(1000, location + 8), 10, FontStyle.Regular, null, null));
+
+                //    if (location != 14 && location != 74)
+                //    {
+                //        // Partition between Visits
+                //        ViewPanel.Controls.Add(CreatePartition(location - 10));
+                //    }
+
+                //    location += 50;
+                //}
             }
             else
             {
@@ -1341,23 +1435,50 @@ namespace Theme_Park_Tracker
             {
                 int location = 74;
 
-                foreach (Park park in Database.parks)
+                List<Control> controls = new List<Control>();
+                object lockObj = new object();
+
+                // Parallel loops through each Park
+                Parallel.ForEach(Database.parks, park =>
                 {
-                    // Parks name
-                    ViewPanel.Controls.Add(CreateLabel(park.GetName(), null, new Point(14, location), 20, FontStyle.Regular, ViewThemeParkClicked, park));
+                    Control parkLabel, summaryLabel, partition = null;
+                    int thisLocation;
+
+                    // This locks this object, pausing all other threads that reach this point, allowing the shared location variable to be processed properly
+                    lock (lockObj)
+                    {
+                        thisLocation = location;
+                        location += 50;
+                    }
+
+                    // Park Name
+                    parkLabel = CreateLabel(park.GetName(), null, new Point(14, thisLocation), 20, FontStyle.Regular, ViewThemeParkClicked, park);
 
                     // Rides in park count
                     int parkRides = Database.GetAttractionByPark(park.GetID()).Count;
-                    ViewPanel.Controls.Add(CreateLabel($"{parkRides} ride{(parkRides == 1 ? "" : "s")} tracked", null, new Point(1100, location + 8), 10, FontStyle.Regular, null, null));
+                    summaryLabel = CreateLabel($"{parkRides} ride{(parkRides == 1 ? "" : "s")} tracked", null, new Point(1100, thisLocation + 8), 10, FontStyle.Regular, null, null);
 
-                    if (location != 74)
+                    if (thisLocation != 74)
                     {
                         // Partition between Parks
-                        ViewPanel.Controls.Add(CreatePartition(location - 10));
+                        partition = CreatePartition(thisLocation - 10);
                     }
 
-                    location += 50;
-                }
+                    // Add controls to the list of controls to be added
+                    lock (lockObj)
+                    {
+                        controls.Add(parkLabel);
+                        controls.Add(summaryLabel);
+                        if (partition != null) controls.Add(partition);
+                    }
+                });
+
+                // Add all controls
+                Invoke(() =>
+                {
+                    // AddRange allows them to be added in bulk for further optimisation
+                    ViewPanel.Controls.AddRange(controls.ToArray());
+                });
             }
             else
             {
@@ -1573,23 +1694,50 @@ namespace Theme_Park_Tracker
             {
                 int location = 74;
 
-                foreach (Manufacturer manufacturer in Database.manufacturers)
+                List<Control> controls = new List<Control>();
+                object lockObj = new object();
+
+                // Parallel loops through each Manufacturer
+                Parallel.ForEach(Database.manufacturers, manufacturer =>
                 {
+                    Control manufacturerLabel, summaryLabel, partition = null;
+                    int thisLocation;
+
+                    // This locks this object, pausing all other threads that reach this point, allowing the shared location variable to be processed properly
+                    lock (lockObj)
+                    {
+                        thisLocation = location;
+                        location += 50;
+                    }
+
                     // Displays Manufacturer name
-                    ViewPanel.Controls.Add(CreateLabel(manufacturer.GetName(), null, new Point(14, location), 20, FontStyle.Regular, ViewManufacturerClicked, manufacturer));
+                    manufacturerLabel = CreateLabel(manufacturer.GetName(), null, new Point(14, thisLocation), 20, FontStyle.Regular, ViewManufacturerClicked, manufacturer);
 
                     // Manufacturers RideType count
                     int manufacturerModels = Database.GetRideTypesByManufacturerID(manufacturer.GetID()).Count;
-                    ViewPanel.Controls.Add(CreateLabel($"{manufacturerModels} model{(manufacturerModels == 1 ? "" : "s")} tracked", null, new Point(1085, location + 8), 10, FontStyle.Regular, null, null));
+                    summaryLabel = CreateLabel($"{manufacturerModels} model{(manufacturerModels == 1 ? "" : "s")} tracked", null, new Point(1085, thisLocation + 8), 10, FontStyle.Regular, null, null);
 
-                    if (location != 74)
+                    if (thisLocation != 74)
                     {
                         // Partition between Manufacturers
-                        ViewPanel.Controls.Add(CreatePartition(location - 10));
+                        partition = CreatePartition(thisLocation - 10);
                     }
 
-                    location += 50;
-                }
+                    // Add controls to the list of controls to be added
+                    lock (lockObj)
+                    {
+                        controls.Add(manufacturerLabel);
+                        controls.Add(summaryLabel);
+                        if (partition != null) controls.Add(partition);
+                    }
+                });
+
+                // Add all controls
+                Invoke(() =>
+                {
+                    // AddRange allows them to be added in bulk for further optimisation
+                    ViewPanel.Controls.AddRange(controls.ToArray());
+                });
             }
             else
             {
@@ -1828,19 +1976,45 @@ namespace Theme_Park_Tracker
             {
                 int location = 14;
 
-                foreach (Attraction attraction in attractions)
-                {
-                    // Attraction name
-                    ViewPanel.Controls.Add(CreateLabel($"{attraction.GetName(DateOnly.FromDateTime(DateTime.Now))} - {attraction.GetPark().GetName()}", null, new Point(14, location), 20, FontStyle.Regular, ViewRideClicked, attraction));
+                List<Control> controls = new List<Control>();
+                object lockObj = new object();
 
-                    if (location != 14)
+                // Parallel loops through each Attraction
+                Parallel.ForEach(attractions, attraction =>
+                {
+                    Control attractionLabel, partition = null;
+                    int thisLocation;
+
+                    // This locks this object, pausing all other threads that reach this point, allowing the shared location variable to be processed properly
+                    lock (lockObj)
                     {
-                        // Partition between Attractions
-                        ViewPanel.Controls.Add(CreatePartition(location - 10));
+                        thisLocation = location;
+                        location += 50;
                     }
 
-                    location += 50;
-                }
+                    // Attraction name
+                    attractionLabel = CreateLabel($"{attraction.GetName(DateOnly.FromDateTime(DateTime.Now))} - {attraction.GetPark().GetName()}", null, new Point(14, thisLocation), 20, FontStyle.Regular, ViewRideClicked, attraction);
+
+                    if (thisLocation != 14)
+                    {
+                        // Partition between Attractions
+                        partition = CreatePartition(thisLocation - 10);
+                    }
+
+                    // Add controls to the list of controls to be added
+                    lock (lockObj)
+                    {
+                        controls.Add(attractionLabel);
+                        if (partition != null) controls.Add(partition);
+                    }
+                });
+
+                // Add all controls
+                Invoke(() =>
+                {
+                    // AddRange allows them to be added in bulk for further optimisation
+                    ViewPanel.Controls.AddRange(controls.ToArray());
+                });
             }
             else
             {
@@ -2355,19 +2529,45 @@ namespace Theme_Park_Tracker
             {
                 int location = 14;
 
-                foreach (RideType rideType in rideTypes)
-                {
-                    // Ride name and manufacturer label
-                    ViewPanel.Controls.Add(CreateLabel($"{rideType.GetName()} - {rideType.GetManufacturer().GetName()}", null, new Point(14, location), 20, FontStyle.Regular, ViewRideTypeClicked, rideType));
+                List<Control> controls = new List<Control>();
+                object lockObj = new object();
 
-                    if (location != 14)
+                // Parallel loops through each RideType
+                Parallel.ForEach(rideTypes, rideType =>
+                {
+                    Control rideName, partition = null;
+                    int thisLocation;
+
+                    // This locks this object, pausing all other threads that reach this point, allowing the shared location variable to be processed properly
+                    lock (lockObj)
                     {
-                        // Partition between RideTypes
-                        ViewPanel.Controls.Add(CreatePartition(location - 10));
+                        thisLocation = location;
+                        location += 50;
                     }
 
-                    location += 50;
-                }
+                    // Ride name and manufacturer label
+                    rideName = CreateLabel($"{rideType.GetName()} - {rideType.GetManufacturer().GetName()}", null, new Point(14, thisLocation), 20, FontStyle.Regular, ViewRideTypeClicked, rideType);
+
+                    if (thisLocation != 14)
+                    {
+                        // Partition between RideTypes
+                        partition = CreatePartition(thisLocation - 10);
+                    }
+
+                    // Add controls to the list of controls to be added
+                    lock (lockObj)
+                    {
+                        controls.Add(rideName);
+                        if (partition != null) controls.Add(partition);
+                    }
+                });
+
+                // Add all controls
+                Invoke(() =>
+                {
+                    // AddRange allows them to be added in bulk for further optimisation
+                    ViewPanel.Controls.AddRange(controls.ToArray());
+                });
             }
             else
             {
