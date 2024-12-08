@@ -54,7 +54,7 @@ namespace Theme_Park_Tracker
                     {
                         secondaryAmount = int.Parse(args[2]);
                     }
-                    catch (Exception ex) { }
+                    catch { }
                     foreach (string fileName in files)
                     {
                         string file = fileName.Split('.')[0].ToLower();
@@ -74,7 +74,7 @@ namespace Theme_Park_Tracker
                             secondaryAmount = int.Parse(args[i + 2]);
                             i++;
                         }
-                        catch(Exception ex) { }
+                        catch { }
                         PopulateData(file, amount, secondaryAmount);
                     }
                 }
@@ -210,12 +210,9 @@ namespace Theme_Park_Tracker
         }
         static async Task ReadFiles()
         {
-            List<Task> tasks1 = new List<Task>();
-            List<Task> tasks2 = new List<Task>();
-            List<Task> tasks3 = new List<Task>();
-            List<string> fileCreations = new List<string>();
+            List<Task> tasks = new List<Task>();
 
-            tasks1.Add(Task.Run(() =>
+            tasks.Add(Task.Run(() =>
             {
                 // Loads all Profile information
                 if (!File.Exists("Profiles.dat"))
@@ -241,7 +238,7 @@ namespace Theme_Park_Tracker
                 }
             }));
 
-            tasks1.Add(Task.Run(() =>
+            tasks.Add(Task.Run(() =>
             {
                 // Loads all Park information
                 if (!File.Exists("Parks.dat"))
@@ -265,7 +262,7 @@ namespace Theme_Park_Tracker
                 }
             }));
 
-            tasks1.Add(Task.Run(() =>
+            tasks.Add(Task.Run(() =>
             {
                 // Loads all the Manufacturer information
                 if (!File.Exists("Manufacturers.dat"))
@@ -289,9 +286,11 @@ namespace Theme_Park_Tracker
                 }
             }));
 
-            await Task.WhenAll(tasks1);
+            // Awaits the first set of tasks being executed so they can be referenced by other tasks
+            await Task.WhenAll(tasks);
+            tasks.Clear();
 
-            tasks2.Add(Task.Run(() =>
+            tasks.Add(Task.Run(() =>
             {
                 // Loads all the Visit information
                 if (!File.Exists("Visits.dat"))
@@ -311,7 +310,7 @@ namespace Theme_Park_Tracker
                         {
                             date = DateOnly.Parse(br.ReadString());
                         }
-                        catch (Exception ex) { }
+                        catch { }
                         Profile profile = Database.GetProfileByID(br.ReadInt32());
                         Park park = Database.GetParkByID(br.ReadInt32());
                         Database.visits.Add(new Visit(id, date, profile, park));
@@ -322,7 +321,7 @@ namespace Theme_Park_Tracker
                 }
             }));
 
-            tasks2.Add(Task.Run(() =>
+            tasks.Add(Task.Run(() =>
             {
                 // Loads all Ride Type information
                 if (!File.Exists("RideTypes.dat"))
@@ -347,7 +346,7 @@ namespace Theme_Park_Tracker
                 }
             }));
 
-            tasks2.Add(Task.Run(() =>
+            tasks.Add(Task.Run(() =>
             {
                 // Loads all Attraction information
                 if (!File.Exists("Attractions.dat"))
@@ -402,9 +401,10 @@ namespace Theme_Park_Tracker
                 }
             }));
 
-            await Task.WhenAll(tasks2);
+            // Awaits the second set of tasks being executed so they can be referenced by other tasks
+            await Task.WhenAll(tasks);
 
-            tasks3.Add(Task.Run(() =>
+            tasks.Add(Task.Run(() =>
             {
                 // Loads all Attraction Rename information
                 if (!File.Exists("AttractionRenames.dat"))
@@ -424,7 +424,7 @@ namespace Theme_Park_Tracker
                         {
                             date = DateOnly.Parse(br.ReadString());
                         }
-                        catch (Exception ex) { }
+                        catch { }
                         string newName = br.ReadString();
                         attraction.AddRename(new AttractionRename(date, newName));
                     }
@@ -434,7 +434,7 @@ namespace Theme_Park_Tracker
                 }
             }));
 
-            tasks3.Add(Task.Run(() =>
+            tasks.Add(Task.Run(() =>
             {
                 // Loads all Visit Sttraction information
                 if (!File.Exists("VisitAttractions.dat"))
@@ -461,7 +461,8 @@ namespace Theme_Park_Tracker
                 }
             }));
 
-            await Task.WhenAll(tasks3);
+            // Awaits the final set of tasks before finishing
+            await Task.WhenAll(tasks);
         }
         static async Task LinkForeignElements()
         {
@@ -491,6 +492,7 @@ namespace Theme_Park_Tracker
                 }
             }));
 
+            // Awaits the tasks before finishing
             await Task.WhenAll(tasks);
         }
 
@@ -529,6 +531,7 @@ namespace Theme_Park_Tracker
             textBox = (TextBox)ViewPanel.Controls.Find("Password", true)[0];
             string password = textBox.Text;
 
+            // Tries to find an account with that username
             Profile checkProfile = Database.GetProfileByUsername(username);
             if (checkProfile == null)
             {
@@ -536,6 +539,7 @@ namespace Theme_Park_Tracker
             }
             else
             {
+                // Verified the password against the account
                 bool validPassword = checkProfile.VerifyPassword(password);
                 if (validPassword == true)
                 {
@@ -603,47 +607,19 @@ namespace Theme_Park_Tracker
             textBox = (TextBox)ViewPanel.Controls.Find("Password2", true)[0];
             string password2 = textBox.Text;
 
-            if (username.Trim() == "" || email.Trim() == "" || password1.Trim() == "" || password2.Trim() == "")
+            // Verifies all of the submitted information is valid
+            if (Database.VerifyInfo(username, email, password1, password2, true))
             {
-                MessageBox.Show("Missing field");
-            }
-            else
-            {
-                Profile checkProfile = Database.GetProfileByUsername(username);
-                if (checkProfile != null)
-                {
-                    MessageBox.Show("Username already exists");
-                }
-                else
-                {
-                    checkProfile = Database.GetProfileByEmail(email);
-                    if (checkProfile != null)
-                    {
-                        MessageBox.Show("Email already exists");
-                    }
-                    else
-                    {
-                        if (password1 != password2)
-                        {
-                            MessageBox.Show("Passwords do not match");
-                        }
-                        else
-                        {
-                            if (Database.VerifyInfo(username, email, password1))
-                            {
-                                Profile profile = new Profile(Database.GetNextProfileID(), username, email, password1, true);
-                                Database.profiles.Add(profile);
-                                Database.profile = profile;
-                                LoadFeed();
-                            }
-                        }
-                    }
-                }
+                Profile profile = new Profile(Database.GetNextProfileID(), username, email, password1, true);
+                Database.profiles.Add(profile);
+                Database.profile = profile;
+                LoadFeed();
             }
         }
 
         private void profileToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            // Verifies the user has logged in
             if (Database.profile != null)
             {
                 LoadProfile();
@@ -652,8 +628,6 @@ namespace Theme_Park_Tracker
         public void LoadProfile()
         {
             ViewPanel.Controls.Clear();
-
-            List<TextBox> textBoxes = new List<TextBox>();
 
             // Displays username at top of page
             ViewPanel.Controls.Add(CreateLabel(Database.profile.GetUsername(), null, new Point(12, 10), 30, FontStyle.Regular, null, null));
@@ -665,70 +639,92 @@ namespace Theme_Park_Tracker
             ViewPanel.Controls.Add(CreateLabel("Username:", null, new Point(14, 80), 15, FontStyle.Regular, null, null));
 
             // Username field
-            textBoxes.Add(CreateTextBox(Database.profile.GetUsername(), "Username", new Point(130, 82), 200, false));
-            ViewPanel.Controls.Add(textBoxes[0]);
+            ViewPanel.Controls.Add(CreateTextBox(Database.profile.GetUsername(), "Username", new Point(130, 82), 200, false));
 
             // "Email" text
             ViewPanel.Controls.Add(CreateLabel("Email:", null, new Point(14, 110), 15, FontStyle.Regular, null, null));
 
             // Email field
-            textBoxes.Add(CreateTextBox(Database.profile.GetEmail(), "Email", new Point(130, 112), 200, false));
-            ViewPanel.Controls.Add(textBoxes[1]);
+            ViewPanel.Controls.Add(CreateTextBox(Database.profile.GetEmail(), "Email", new Point(130, 112), 200, false));
 
             // "Password" text
             ViewPanel.Controls.Add(CreateLabel("Password:", null, new Point(14, 140), 15, FontStyle.Regular, null, null));
 
             // Password field
-            textBoxes.Add(CreateTextBox(null, "Password", new Point(130, 142), 200, true));
-            ViewPanel.Controls.Add(textBoxes[2]);
+            ViewPanel.Controls.Add(CreateTextBox(null, "Password1", new Point(130, 142), 200, true));
+
+            // "Password" text
+            ViewPanel.Controls.Add(CreateLabel("Password:", null, new Point(14, 170), 15, FontStyle.Regular, null, null));
+
+            // Password field
+            ViewPanel.Controls.Add(CreateTextBox(null, "Password2", new Point(130, 172), 200, true));
 
             // Update info button
-            ViewPanel.Controls.Add(CreateButton("Update", new Point(110, 180), UpdateButtonClicked, null));
+            ViewPanel.Controls.Add(CreateButton("Update", new Point(110, 210), UpdateButtonClicked, null));
 
-            // "Other Users" label for list of other users
-            ViewPanel.Controls.Add(CreateLabel("Other Users", null, new Point(14, 230), 15, FontStyle.Regular, null, null));
-
-            int location = 260;
-            foreach (Profile profile in Database.profiles)
+            // Checks to see if there are any other users in the system
+            if (Database.profiles.Count > 1)
             {
-                if (profile != Database.profile)
+                // "Other Users" label for list of other users
+                ViewPanel.Controls.Add(CreateLabel("Other Users", null, new Point(14, 260), 15, FontStyle.Regular, null, null));
+
+                int location = 290;
+                foreach (Profile profile in Database.profiles)
                 {
-                    // Display other users name
-                    ViewPanel.Controls.Add(CreateLabel(profile.GetUsername(), null, new Point(14, location), 10, FontStyle.Regular, ViewProfileClicked, profile));
-                    location += 20;
+                    if (profile != Database.profile)
+                    {
+                        // Display other users name
+                        ViewPanel.Controls.Add(CreateLabel(profile.GetUsername(), null, new Point(14, location), 10, FontStyle.Regular, ViewProfileClicked, profile));
+                        location += 20;
+                    }
                 }
             }
         }
         private void UpdateButtonClicked(object sender, EventArgs e)
         {
+            // Find all user detail fields from the form
             string username = ((TextBox)ViewPanel.Controls.Find("Username", true)[0]).Text;
             string email = ((TextBox)ViewPanel.Controls.Find("Email", true)[0]).Text;
-            string password = ((TextBox)ViewPanel.Controls.Find("Password", true)[0]).Text;
-            if (Database.VerifyInfo(username, email, password))
+            string password1 = ((TextBox)ViewPanel.Controls.Find("Password1", true)[0]).Text;
+            string password2 = ((TextBox)ViewPanel.Controls.Find("Password2", true)[0]).Text;
+
+            // Verifying the information
+            if (Database.VerifyInfo(username, email, password1, password2, false))
             {
-                Database.profile.UpdateInfo(username, email, password);
+                // If the data is in a valid format, update it
+                Database.profile.UpdateInfo(username, email, password1);
+                MessageBox.Show("Information successfully updated");
             }
         }
         private void ViewProfileClicked(object sender, EventArgs e)
         {
+            // Displays Visit information for clicked Profile
             Label label = (Label)sender;
             Profile profile = (Profile)label.Tag;
             LoadVisits(profile, false);
         }
         private void DeleteProfile(object sender, EventArgs e)
         {
-            Button button = (Button)sender;
-
+            // Asks to confirm this action
             DialogResult confirmResult = MessageBox.Show($"This will permentantly delete this Profile, delete all Visits attached to this Profile, and Save the data\n\nAre you sure you want to delete this Profile?", "Confirm Delete", MessageBoxButtons.YesNo);
+            
+            // If confirmed, delete the data
             if (confirmResult == DialogResult.Yes)
             {
+                // Gets the logged in profile
                 Profile profile = Database.profile;
+
+                // Remove all associated visits. VisitAttractions are only referenced in these so will be dropped too.
                 foreach (Visit visit in profile.GetVisits())
                 {
                     Database.visits.Remove(visit);
                 }
+
+                // Removes the profile from the database
                 Database.profiles.Remove(profile);
                 Database.profile = null;
+
+                // Saves this change and returns to the login screen
                 Database.SaveData();
                 DisplayLogin(null, null);
             }
@@ -736,6 +732,7 @@ namespace Theme_Park_Tracker
 
         private void feedToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            // Verifies the user has logged in
             if (Database.profile != null)
             {
                 LoadFeed();
@@ -745,12 +742,12 @@ namespace Theme_Park_Tracker
         {
             ViewPanel.Controls.Clear();
 
-            // Display hello message
+            // "Hello *user*" text
             ViewPanel.Controls.Add(CreateLabel($"Hello, {Database.profile.GetUsername()}", null, new Point(14, 10), 30, FontStyle.Regular, null, null));
 
-            IEnumerable<Visit> otherVisits = Database.visits.Where(visit => Database.profile.CheckIfDidVisit(visit) == false);
+            List<Visit> otherVisits = Database.visits.Where(visit => Database.profile.CheckIfDidVisit(visit) == false).ToList();
 
-            if (otherVisits.Count() != 0)
+            if (otherVisits.Count() > 0)
             {
                 int location = 90;
                 foreach (Visit visit in otherVisits)
@@ -770,7 +767,7 @@ namespace Theme_Park_Tracker
                 ViewPanel.Controls.Add(CreateLabel("No activity from other users!", null, new Point(50, 317), 10, FontStyle.Regular, null, null));
             }
         }
-
+        // Got to here
         private void visitsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (Database.profile != null)
@@ -2080,7 +2077,7 @@ namespace Theme_Park_Tracker
                         datePicker = (DateTimePicker)panel.Controls[3];
                         renames.Add(new AttractionRename(DateOnly.FromDateTime(datePicker.Value), textBox.Text));
                     }
-                    catch (Exception ex) { }
+                    catch { }
                 }
                 attraction.SetRenames(renames);
             }
@@ -2135,7 +2132,7 @@ namespace Theme_Park_Tracker
             {
                 rename = (AttractionRename)clickedButton.Tag;
             }
-            catch (Exception ex) { }
+            catch { }
 
             int before = Controls.Find("TypeBased", true).Count() * 2;
 
@@ -2185,7 +2182,7 @@ namespace Theme_Park_Tracker
                             panelCheck.Location = new Point(panelCheck.Location.X, panelCheck.Location.Y - 40);
                         }
                     }
-                    catch(Exception ex) { }
+                    catch { }
                 }
             }
         }

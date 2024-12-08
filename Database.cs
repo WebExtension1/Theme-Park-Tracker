@@ -29,12 +29,12 @@ namespace Theme_Park_Tracker
         }
         public static Profile GetProfileByUsername(string username)
         {
-            Profile selectedProfile = profiles.AsParallel().Where(profile => profile.GetUsername() == username).FirstOrDefault();
+            Profile selectedProfile = profiles.AsParallel().Where(profile => profile.GetUsername().ToLower() == username.ToLower()).FirstOrDefault();
             return selectedProfile;
         }
         public static Profile GetProfileByEmail(string email)
         {
-            Profile selectedProfile = profiles.AsParallel().Where(profile => profile.GetEmail() == email).FirstOrDefault();
+            Profile selectedProfile = profiles.AsParallel().Where(profile => profile.GetEmail().ToLower() == email.ToLower()).FirstOrDefault();
             return selectedProfile;
         }
 
@@ -129,20 +129,63 @@ namespace Theme_Park_Tracker
         }
 
         // Verify valid profile info
-        public static bool VerifyInfo(string username, string email, string password)
+        public static bool VerifyInfo(string username, string email, string password1, string password2, bool create)
         {
-            IEnumerable<Profile> selectedProfilesIEnumerable = profiles.Where(profileCheck => (profileCheck.GetUsername() == username || profileCheck.GetEmail() == email) && profileCheck.GetID() != profile.GetID());
-            List<Profile> selectedProfiles = selectedProfilesIEnumerable.ToList();
-            if (selectedProfiles.Count > 0)
+            username = username.Trim();
+            email = email.Trim();
+            password1 = password1.Trim();
+            password2 = password2.Trim();
+
+            // Checks for empty field
+            List<string> errors = new List<string>();
+            if (username == "" || email == "" || password1 == "" || password2 == "")
             {
-                MessageBox.Show("Duplicate information in the username/email field");
+                errors.Add("Form contains one or more empty fields");
+            }
+
+            // Checks for duplicate unique information (Username and Email)
+            Profile checkProfile = GetProfileByUsername(username);
+            if (checkProfile != null && create)
+            {
+                errors.Add("Username already exists");
+            }
+            checkProfile = GetProfileByEmail(email);
+            if (checkProfile != null && create)
+            {
+                errors.Add("Email already exists");
+            }
+
+            // Checks Email is in a correct format
+            if (email.Split('@').Length != 2)
+            {
+                errors.Add("Email not in correct format");
+            }
+            else
+            {
+                if (email.Split('@')[1].Split('.').Length == 1)
+                {
+                    errors.Add("Email not in correct format");
+
+                }
+            }
+
+            // Check Passwords match
+            if (password1 != password2)
+            {
+                errors.Add("Passwords do not match");
+            }
+
+            if (errors.Count > 0)
+            {
+                string message = $"The following issue{(errors.Count == 1 ? "s were" : " was")} found";
+                foreach (string error in errors)
+                {
+                    message += $"\n- {error}";
+                }
+                MessageBox.Show(message);
                 return false;
             }
-            if (password == "")
-            {
-                MessageBox.Show("Not a valid password");
-                return false;
-            }
+
             return true;
         }
 
@@ -340,7 +383,6 @@ namespace Theme_Park_Tracker
             }
             return 1;
         }
-
         static public int GetNextManufacturerID()
         {
             if (manufacturers.Count >= 1)
@@ -349,7 +391,6 @@ namespace Theme_Park_Tracker
             }
             return 1;
         }
-
         static public int GetNextAttractionID()
         {
             if (attractions.Count() >= 1)
@@ -358,7 +399,6 @@ namespace Theme_Park_Tracker
             }
             return 1;
         }
-
         static public int GetNextRideTypeID()
         {
             if (rideTypes.Count() >= 1)
