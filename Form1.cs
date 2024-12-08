@@ -1612,15 +1612,22 @@ namespace Theme_Park_Tracker
 
             // Updates name
             TextBox textBox = (TextBox)ViewPanel.Controls.Find("Name", true)[0];
-            park.SetName(textBox.Text);
+            bool valid = textBox.Text.Trim() != "";
+            if (valid) park.SetName(textBox.Text);
 
-            // Adds the park if it is being created
-            if (!Database.parks.Contains(park))
+            // Adds the Park if it is being created
+            bool newPark = false;
+            if (!Database.parks.Contains(park)) newPark = true;
+
+            if (!Database.parks.Contains(park) && valid)
             {
                 Database.parks.Add(park);
             }
 
-            ViewThemeParkClicked(sender, e);
+            if (!valid) MessageBox.Show("Invalid name");
+
+            if (!valid && newPark) LoadThemeParks();
+            else ViewThemeParkClicked(sender, e);
         }
         public void DeletePark(object sender, EventArgs e)
         {
@@ -1861,17 +1868,24 @@ namespace Theme_Park_Tracker
             Button clickedButton = (Button)sender;
             Manufacturer manufacturer = (Manufacturer)clickedButton.Tag;
 
-            // Updates the name
+            // Updates name
             TextBox textBox = (TextBox)ViewPanel.Controls.Find("Name", true)[0];
-            manufacturer.SetName(textBox.Text);
+            bool valid = textBox.Text.Trim() != "";
+            if (valid) manufacturer.SetName(textBox.Text);
 
-            // Adds the Manufacturer if it's being created
-            if (!Database.manufacturers.Contains(manufacturer))
+            // Adds the Manufacturer if it is being created
+            bool newManufacturer = false;
+            if (!Database.manufacturers.Contains(manufacturer)) newManufacturer = true;
+
+            if (!Database.manufacturers.Contains(manufacturer) && valid)
             {
                 Database.manufacturers.Add(manufacturer);
             }
 
-            ViewManufacturerClicked(sender, e);
+            if (!valid) MessageBox.Show("Invalid name");
+
+            if (!valid && newManufacturer) LoadManufacturers();
+            else ViewManufacturerClicked(sender, e);
         }
         public void DeleteManufacturer(object sender, EventArgs e)
         {
@@ -2337,9 +2351,10 @@ namespace Theme_Park_Tracker
             Button clickedButton = (Button)sender;
             Attraction attraction = (Attraction)clickedButton.Tag;
 
-            // Updates the Attractions name
+            // Updates name
             TextBox textBox = (TextBox)ViewPanel.Controls.Find("Name", true)[0];
-            attraction.SetName(textBox.Text);
+            bool valid = textBox.Text.Trim() != "";
+            if (valid) attraction.SetName(textBox.Text);
 
             // Gets the RideType
             ComboBox comboBox = (ComboBox)ViewPanel.Controls.Find("RideTypes", true)[0];
@@ -2352,28 +2367,42 @@ namespace Theme_Park_Tracker
                 attraction.SetRideType(null);
             }
 
-            // Gets the type
-            comboBox = (ComboBox)ViewPanel.Controls.Find("Types", true)[0];
-            attraction.GetPark().RemoveAttraction(attraction);
-            Database.attractions.Remove(attraction);
+            // Adds the RideType if it is being created
+            bool newAttraction = false;
+            if (!Database.attractions.Contains(attraction)) newAttraction = true;
 
-            // Gets the Attraction based on its type
-            switch (comboBox.SelectedIndex)
+            if (!Database.attractions.Contains(attraction) && valid)
             {
-                case 0:
-                    attraction = new Rollercoaster(attraction.GetID(), attraction.GetOpeningName(), attraction.GetOpeningDate(), attraction.GetPark(), attraction.GetRideType(), int.Parse(((NumericUpDown)Controls.Find("TrackLength", true)[0]).Value.ToString()), int.Parse(((NumericUpDown)Controls.Find("TopSpeed", true)[0]).Value.ToString()), int.Parse(((NumericUpDown)Controls.Find("Inversions", true)[0]).Value.ToString()));
-                    break;
-                case 2:
-                    attraction = new DarkRide(attraction.GetID(), attraction.GetOpeningName(), attraction.GetOpeningDate(), attraction.GetPark(), attraction.GetRideType(), int.Parse(((NumericUpDown)Controls.Find("TrackLength", true)[0]).Value.ToString()), int.Parse((((ComboBox)Controls.Find("Type", true)[0]).SelectedIndex + 1).ToString()));
-                    break;
-                case 1:
-                    attraction = new FlatRide(attraction.GetID(), attraction.GetOpeningName(), attraction.GetOpeningDate(), attraction.GetPark(), attraction.GetRideType(), int.Parse((((ComboBox)Controls.Find("Type", true)[0]).SelectedIndex + 1).ToString()));
-                    break;
+                Database.attractions.Add(attraction);
             }
 
-            // Adds the Attraction if it's being created
-            Database.attractions.Add(attraction);
-            attraction.GetPark().AddAttraction(attraction);
+            if (!valid) MessageBox.Show("Invalid name");
+
+            if (valid)
+            {
+                // Gets the type
+                comboBox = (ComboBox)ViewPanel.Controls.Find("Types", true)[0];
+                attraction.GetPark().RemoveAttraction(attraction);
+                Database.attractions.Remove(attraction);
+
+                // Gets the Attraction based on its type
+                switch (comboBox.SelectedIndex)
+                {
+                    case 0:
+                        attraction = new Rollercoaster(attraction.GetID(), attraction.GetOpeningName(), attraction.GetOpeningDate(), attraction.GetPark(), attraction.GetRideType(), int.Parse(((NumericUpDown)Controls.Find("TrackLength", true)[0]).Value.ToString()), int.Parse(((NumericUpDown)Controls.Find("TopSpeed", true)[0]).Value.ToString()), int.Parse(((NumericUpDown)Controls.Find("Inversions", true)[0]).Value.ToString()));
+                        break;
+                    case 2:
+                        attraction = new DarkRide(attraction.GetID(), attraction.GetOpeningName(), attraction.GetOpeningDate(), attraction.GetPark(), attraction.GetRideType(), int.Parse(((NumericUpDown)Controls.Find("TrackLength", true)[0]).Value.ToString()), int.Parse((((ComboBox)Controls.Find("Type", true)[0]).SelectedIndex + 1).ToString()));
+                        break;
+                    case 1:
+                        attraction = new FlatRide(attraction.GetID(), attraction.GetOpeningName(), attraction.GetOpeningDate(), attraction.GetPark(), attraction.GetRideType(), int.Parse((((ComboBox)Controls.Find("Type", true)[0]).SelectedIndex + 1).ToString()));
+                        break;
+                }
+
+                // Adds the Attraction if it's being created
+                Database.attractions.Add(attraction);
+                attraction.GetPark().AddAttraction(attraction);
+            }
 
             // Gets each rename
             DateTimePicker datePicker;
@@ -2402,7 +2431,9 @@ namespace Theme_Park_Tracker
             // Goes back to the view of the Attraction
             clickedButton.Tag = attraction;
             sender = (object)clickedButton;
-            ViewRideClicked(sender, e);
+
+            if (!valid && newAttraction) LoadRides("all");
+            else ViewRideClicked(sender, e);
         }
         public void DeleteRide(object sender, EventArgs e)
         {
@@ -2648,17 +2679,22 @@ namespace Theme_Park_Tracker
 
             // Updates name
             TextBox textBox = (TextBox)ViewPanel.Controls.Find("Name", true)[0];
-            rideType.SetName(textBox.Text);
+            bool valid = textBox.Text.Trim() != "";
+            if (valid) rideType.SetName(textBox.Text);
 
-            // Adds the RideType if it's being created
-            if (!Database.rideTypes.Contains(rideType))
+            // Adds the RideType if it is being created
+            bool newRideType = false;
+            if (!Database.rideTypes.Contains(rideType)) newRideType = true;
+
+            if (!Database.rideTypes.Contains(rideType) && valid)
             {
                 Database.rideTypes.Add(rideType);
-                rideType.GetManufacturer().AddRideType(rideType);
             }
 
-            // Returns the details once saved
-            ViewRideTypeClicked(sender, e);
+            if (!valid) MessageBox.Show("Invalid name");
+
+            if (!valid && newRideType) LoadRideTypes();
+            else ViewRideTypeClicked(sender, e);
         }
         public void DeleteRideType(object sender, EventArgs e)
         {
