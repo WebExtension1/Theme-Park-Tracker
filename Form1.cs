@@ -2133,8 +2133,8 @@ namespace Theme_Park_Tracker
             // Ride Type ComboBox
             comboBox = new ComboBox();
             comboBox.Items.Add("Rollercoaster");
-            comboBox.Items.Add("Flat Ride");
             comboBox.Items.Add("Dark Ride");
+            comboBox.Items.Add("Flat Ride");
             comboBox.Location = new Point(115, 54);
             comboBox.Size = new Size(200, 10);
             comboBox.Tag = attraction;
@@ -2178,12 +2178,12 @@ namespace Theme_Park_Tracker
                     attraction = rollercoaster;
                     break;
                 case 1:
-                    FlatRide flatRide = new FlatRide(attraction.GetID(), attraction.GetOpeningName(), attraction.GetOpeningDate(), attraction.GetPark(), attraction.GetRideType(), 1);
-                    attraction = flatRide;
-                    break;
-                case 2:
                     DarkRide darkRide = new DarkRide(attraction.GetID(), attraction.GetOpeningName(), attraction.GetOpeningDate(), attraction.GetPark(), attraction.GetRideType(), 1, 1);
                     attraction = darkRide;
+                    break;
+                case 2:
+                    FlatRide flatRide = new FlatRide(attraction.GetID(), attraction.GetOpeningName(), attraction.GetOpeningDate(), attraction.GetPark(), attraction.GetRideType(), 1);
+                    attraction = flatRide;
                     break;
             }
             OutputTypeDetails(attraction, true);
@@ -2391,10 +2391,10 @@ namespace Theme_Park_Tracker
                     case 0:
                         attraction = new Rollercoaster(attraction.GetID(), attraction.GetOpeningName(), attraction.GetOpeningDate(), attraction.GetPark(), attraction.GetRideType(), int.Parse(((NumericUpDown)Controls.Find("TrackLength", true)[0]).Value.ToString()), int.Parse(((NumericUpDown)Controls.Find("TopSpeed", true)[0]).Value.ToString()), int.Parse(((NumericUpDown)Controls.Find("Inversions", true)[0]).Value.ToString()));
                         break;
-                    case 2:
+                    case 1:
                         attraction = new DarkRide(attraction.GetID(), attraction.GetOpeningName(), attraction.GetOpeningDate(), attraction.GetPark(), attraction.GetRideType(), int.Parse(((NumericUpDown)Controls.Find("TrackLength", true)[0]).Value.ToString()), int.Parse((((ComboBox)Controls.Find("Type", true)[0]).SelectedIndex + 1).ToString()));
                         break;
-                    case 1:
+                    case 2:
                         attraction = new FlatRide(attraction.GetID(), attraction.GetOpeningName(), attraction.GetOpeningDate(), attraction.GetPark(), attraction.GetRideType(), int.Parse((((ComboBox)Controls.Find("Type", true)[0]).SelectedIndex + 1).ToString()));
                         break;
                 }
