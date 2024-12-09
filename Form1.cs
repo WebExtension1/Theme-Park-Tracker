@@ -1030,7 +1030,7 @@ namespace Theme_Park_Tracker
             ViewPanel.Controls.Add(CreateButton("Save Visit", new Point(1120, 14), SaveVisit, visit));
 
             // Deleted Visit
-            ViewPanel.Controls.Add(CreateButton("Delete Visit", new Point(1120, 610), DeleteVisit, visit));
+            ViewPanel.Controls.Add(CreateButton("Delete Visit", new Point(1120, 44), DeleteVisit, visit));
 
             // "Theme Park" text
             ViewPanel.Controls.Add(CreateLabel("Theme Park:", null, new Point(14, 14), 10, FontStyle.Regular, null, null));
@@ -1456,7 +1456,7 @@ namespace Theme_Park_Tracker
 
                     // Rides in park count
                     int parkRides = Database.GetAttractionByPark(park.GetID()).Count;
-                    summaryLabel = CreateLabel($"{parkRides} ride{(parkRides == 1 ? "" : "s")} tracked", null, new Point(1100, thisLocation + 8), 10, FontStyle.Regular, null, null);
+                    summaryLabel = CreateLabel($"{parkRides} ride{(parkRides == 1 ? "" : "s")} tracked", null, new Point(1080, thisLocation + 8), 10, FontStyle.Regular, null, null);
 
                     if (thisLocation != 74)
                     {
@@ -1514,8 +1514,11 @@ namespace Theme_Park_Tracker
             // Displays Park name
             ViewPanel.Controls.Add(CreateLabel(park.GetName(), null, new Point(14, 14), 20, FontStyle.Bold, null, null));
 
-            // Total ride count
-            ViewPanel.Controls.Add(CreateLabel($"Total Rides: {(park.GetAttractions() == null ? "0" : park.GetAttractions().Count)}", null, new Point(400, 18), 15, FontStyle.Regular, null, null));
+            // Total Rides count
+            ViewPanel.Controls.Add(CreateLabel($"Total Rides: {(park.GetAttractions() == null ? "0" : park.GetAttractions().Count)}", null, new Point(700, 18), 15, FontStyle.Regular, null, null));
+
+            // Total Visits count
+            ViewPanel.Controls.Add(CreateLabel($"Total Visits: {(Database.GetVisitsByParkID(park.GetID()).Count == null ? "0" : Database.GetVisitsByParkID(park.GetID()).Count)}", null, new Point(900, 18), 15, FontStyle.Regular, null, null));
 
             // "Rides" text
             ViewPanel.Controls.Add(CreateLabel("Rides", null, new Point(14, 65), 15, FontStyle.Bold, null, null));
@@ -2072,6 +2075,131 @@ namespace Theme_Park_Tracker
 
             // Attraction name
             ViewPanel.Controls.Add(CreateLabel(attraction.GetName(DateOnly.FromDateTime(DateTime.Now)), null, new Point(14, 14), 20, FontStyle.Bold, null, null));
+
+            // Theme Park name
+            ViewPanel.Controls.Add(CreateLabel(attraction.GetPark().GetName(), null, new Point(14, 44), 15, FontStyle.Regular, ViewThemeParkClicked, attraction.GetPark()));
+
+            int location = 70;
+
+            // Displays opening name if different
+            if (attraction.GetName(DateOnly.FromDateTime(DateTime.Now)) != attraction.GetOpeningName())
+            {
+                ViewPanel.Controls.Add(CreateLabel($"Opened as: {attraction.GetOpeningName()}", null, new Point(14, location), 10, FontStyle.Regular, null, null));
+                location += 20;
+            }
+
+            // Displays opening date
+            ViewPanel.Controls.Add(CreateLabel($"Opened on: {attraction.GetOpeningDate()}", null, new Point(14, location), 10, FontStyle.Regular, null, null));
+            location += 40;
+
+            if (attraction.GetRideType() != null)
+            {
+                // Displays Ride Type
+                ViewPanel.Controls.Add(CreateLabel($"Ride Type: {attraction.GetRideType().GetName()} - {attraction.GetRideType().GetManufacturer().GetName()}", null, new Point(14, location), 10, FontStyle.Regular, null, null));
+                location += 20;
+            }
+
+            // Displays different info depending on the type of Attraction
+            List<string> elements = attraction.GetElements();
+            switch (elements[0])
+            {
+                // Rollercoaster
+                case "1":
+                    // Type
+                    ViewPanel.Controls.Add(CreateLabel($"Type: Rollercoaster", null, new Point(14, location), 10, FontStyle.Regular, null, null));
+                    location += 20;
+
+                    // Displays Track Length
+                    ViewPanel.Controls.Add(CreateLabel($"Track Length: {elements[1]}", null, new Point(14, location), 10, FontStyle.Regular, null, null));
+                    location += 20;
+
+                    // Displays Top Speed
+                    ViewPanel.Controls.Add(CreateLabel($"Top Speed: {elements[2]}", null, new Point(14, location), 10, FontStyle.Regular, null, null));
+                    location += 20;
+
+                    // Displays Inversions
+                    ViewPanel.Controls.Add(CreateLabel($"Inversions: {elements[3]}", null, new Point(14, location), 10, FontStyle.Regular, null, null));
+                    location += 40;
+
+                    break;
+
+                // Dark Ride
+                case "2":
+                    // Type
+                    ViewPanel.Controls.Add(CreateLabel($"Type: Dark Ride", null, new Point(14, location), 10, FontStyle.Regular, null, null));
+                    location += 20;
+
+                    // Displays Track Length
+                    ViewPanel.Controls.Add(CreateLabel($"Track Length: {elements[1]}", null, new Point(14, location), 10, FontStyle.Regular, null, null));
+                    location += 20;
+
+                    // Displays Type
+                    ViewPanel.Controls.Add(CreateLabel($"Type: {elements[2]}", null, new Point(14, location), 10, FontStyle.Regular, null, null));
+                    location += 40;
+
+                    break;
+
+                // Flat Ride
+                case "3":
+                    // Type
+                    ViewPanel.Controls.Add(CreateLabel($"Type: Flat Ride", null, new Point(14, location), 10, FontStyle.Regular, null, null));
+                    location += 20;
+
+                    // Displays Type
+                    ViewPanel.Controls.Add(CreateLabel($"Type: {elements[1]}", null, new Point(14, location), 10, FontStyle.Regular, null, null));
+                    location += 40;
+
+                    break;
+            }
+
+            // Rename History
+            if (attraction.GetRenames().Count > 0)
+            {
+                // "Rename History" header
+                ViewPanel.Controls.Add(CreateLabel($"Name History:", null, new Point(14, location), 15, FontStyle.Bold, null, null));
+                location += 30;
+
+                // Original name
+                ViewPanel.Controls.Add(CreateLabel($"{attraction.GetOpeningDate()}  -  {attraction.GetOpeningName()}", null, new Point(14, location), 10, FontStyle.Regular, null, null));
+                location += 20;
+
+                List<AttractionRename> renames = attraction.GetRenames();
+                foreach (AttractionRename rename in renames)
+                {
+                    // New name
+                    ViewPanel.Controls.Add(CreateLabel($"{rename.GetDate()}  -  {rename.GetName()}", null, new Point(14, location), 10, FontStyle.Regular, null, null));
+                    location += 20;
+                }
+                location += 20;
+            }
+
+            // Visits
+
+            // Gets a list of all Visits which contain this ride
+            List<Visit> visits = new List<Visit>();
+            foreach (Visit visit in Database.GetVisitsByParkID(attraction.GetID()))
+            {
+                if (visit.GetAttractions().Any(visitAttraction => visitAttraction.GetAttraction() == attraction))
+                {
+                    visits.Add(visit);
+                }
+            }
+
+            // Checks if any Visits were found
+            if (visits.Count > 0)
+            {
+                // "Rename History" header
+                ViewPanel.Controls.Add(CreateLabel($"In Visits:", null, new Point(14, location), 15, FontStyle.Bold, null, null));
+                location += 30;
+
+                // Outputs each Visit found
+                foreach (Visit visit in visits)
+                {
+                    // Visit name
+                    ViewPanel.Controls.Add(CreateLabel($"{visit.GetPark().GetName()} - {visit.GetDate()}", null, new Point(14, location), 10, FontStyle.Regular, ViewVisitClicked, visit));
+                    location += 20;
+                }
+            }
         }
         public void NewRide(object sender, EventArgs e)
         {
@@ -2090,10 +2218,10 @@ namespace Theme_Park_Tracker
             Attraction attraction = (Attraction)clickedButton.Tag;
 
             // Save Attraction button
-            ViewPanel.Controls.Add(CreateButton("Save ride", new Point(1100, 14), SaveRide, attraction));
+            ViewPanel.Controls.Add(CreateButton("Save ride", new Point(1120, 14), SaveRide, attraction));
 
             // Save Attraction button
-            ViewPanel.Controls.Add(CreateButton("Delete ride", new Point(1100, 610), DeleteRide, attraction));
+            ViewPanel.Controls.Add(CreateButton("Delete ride", new Point(1120, 44), DeleteRide, attraction));
 
             // "Name" text
             ViewPanel.Controls.Add(CreateLabel("Name:", null, new Point(14, 14), 10, FontStyle.Regular, null, null));
@@ -2152,6 +2280,8 @@ namespace Theme_Park_Tracker
             timePicker.Location = new Point(115, 75);
             timePicker.Name = "OpeningDate";
             ViewPanel.Controls.Add(timePicker);
+
+            if (attraction != null) timePicker.Value = attraction.GetOpeningDate().ToDateTime(TimeOnly.FromDateTime(DateTime.Now));
 
             // Add Rename button
             ViewPanel.Controls.Add(CreateButton("Add Rename", new Point(14, 124), RenameClicked, null));
@@ -2287,7 +2417,7 @@ namespace Theme_Park_Tracker
                 // Tracked Ride -> Dark Ride
                 case "2":
                     // "Track Length" text
-                    ViewPanel.Controls.Add(CreateLabel("Track Length (metres):", "TypeBased", new Point(500, 25), 10, FontStyle.Regular, null, null));
+                    ViewPanel.Controls.Add(CreateLabel("Track Length (metres):", "TypeBased", new Point(500, 35), 10, FontStyle.Regular, null, null));
 
                     // Track Length NumericUpDown
                     numericUpDown = new NumericUpDown();
@@ -2299,7 +2429,7 @@ namespace Theme_Park_Tracker
                     ViewPanel.Controls.Add(numericUpDown);
 
                     // "Type" text
-                    ViewPanel.Controls.Add(CreateLabel("Type:", "TypeBased", new Point(500, 25), 10, FontStyle.Regular, null, null));
+                    ViewPanel.Controls.Add(CreateLabel("Type:", "TypeBased", new Point(500, 56), 10, FontStyle.Regular, null, null));
 
                     // Type ComboBox
                     comboBox = new ComboBox();
@@ -2323,7 +2453,7 @@ namespace Theme_Park_Tracker
                 // Flat Ride
                 case "3":
                     // "Type" text
-                    ViewPanel.Controls.Add(CreateLabel("Type:", "TypeBased", new Point(500, 25), 10, FontStyle.Regular, null, null));
+                    ViewPanel.Controls.Add(CreateLabel("Type:", "TypeBased", new Point(500, 46), 10, FontStyle.Regular, null, null));
 
                     // Type ComboBox
                     comboBox = new ComboBox();
@@ -2407,7 +2537,7 @@ namespace Theme_Park_Tracker
             // Gets each rename
             DateTimePicker datePicker;
             Control[] panels = ViewPanel.Controls.Find("Panel", true);
-            if (panels.Length > 1)
+            if (panels.Length > 0)
             {
                 List<AttractionRename> renames = new List<AttractionRename>();
                 foreach (Control panelControl in panels)
@@ -2516,7 +2646,7 @@ namespace Theme_Park_Tracker
             }
 
             // Delete rename button
-            panel.Controls.Add(CreateButton("D", new Point(870, 5), DeleteRename, panel));
+            panel.Controls.Add(CreateButton("Delete", new Point(818, 5), DeleteRename, panel));
         }
         public void DeleteRename(object sender, EventArgs e)
         {
