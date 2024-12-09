@@ -116,6 +116,7 @@ namespace Theme_Park_Tracker
             return selectedRideTypes;
         }
 
+
         // Getting Attraction data
         public static Attraction GetAttractionByID(int id)
         {
