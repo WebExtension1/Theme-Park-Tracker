@@ -48,6 +48,7 @@ namespace Theme_Park_Tracker
 
             InitializeComponent();
             InitializeDataAsync();
+            Database.SetNextIDs();
 
             if (args.Length > 0)
             {
@@ -1064,6 +1065,7 @@ namespace Theme_Park_Tracker
             comboBox.Location = new Point(105, 12);
             comboBox.Size = new Size(200, 10);
             comboBox.Name = "Park";
+            comboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             ViewPanel.Controls.Add(comboBox);
 
             // "Date" text
@@ -1090,12 +1092,13 @@ namespace Theme_Park_Tracker
             if (comboBox.Items.Count > 0)
             {
                 comboBox.SelectedIndex = 0;
-                comboBox.Location = new Point(105, 73);
-                comboBox.Width = 200;
-                comboBox.Name = "combo1";
-                comboBox.Tag = Database.GetParkByID(selectedPark + 1);
-                ViewPanel.Controls.Add(comboBox);
             }
+            comboBox.Location = new Point(105, 71);
+            comboBox.Width = 200;
+            comboBox.Name = "combo1";
+            comboBox.Tag = Database.GetParkByID(selectedPark + 1);
+            comboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            ViewPanel.Controls.Add(comboBox);
 
             // Adds Ride
             ViewPanel.Controls.Add(CreateButton("Add Ride", new Point(14, 70), AttractionClicked, comboBox));
@@ -2268,6 +2271,7 @@ namespace Theme_Park_Tracker
             comboBox.Location = new Point(115, 33);
             comboBox.Size = new Size(200, 10);
             comboBox.Name = "RideTypes";
+            comboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             ViewPanel.Controls.Add(comboBox);
 
             // "Ride Type" label
@@ -2282,6 +2286,7 @@ namespace Theme_Park_Tracker
             comboBox.Size = new Size(200, 10);
             comboBox.Tag = attraction;
             comboBox.Name = "Types";
+            comboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             ViewPanel.Controls.Add(comboBox);
 
             if (attraction != null) comboBox.SelectedIndex = int.Parse(attraction.GetElements()[0]) - 1;
@@ -2796,7 +2801,7 @@ namespace Theme_Park_Tracker
             if (attractions.Count > 0)
             {
                 // "Attractions" text
-                ViewPanel.Controls.Add(CreateLabel("Attractions:", null, new Point(14, location), 15, FontStyle.Bold, null, null));
+                ViewPanel.Controls.Add(CreateLabel("Attractions", null, new Point(14, location), 15, FontStyle.Bold, null, null));
                 location += 27;
 
                 foreach (Attraction attraction in attractions)

@@ -21,6 +21,42 @@ namespace Theme_Park_Tracker
         public static List<RideType> rideTypes = new List<RideType>();
         public static List<Attraction> attractions = new List<Attraction>();
 
+        private static int nextVisitID, nextParkID, nextManufacturerID, nextAttractionID, nextRideTypeID, nextProfileID;
+
+        public static void SetNextIDs()
+        {
+            nextVisitID = 1;
+            if (visits.Count > 0)
+            {
+                nextVisitID = visits.Max(visit => visit.GetID()) + 1;
+            }
+            nextParkID = 1;
+            if (parks.Count > 0)
+            {
+                nextParkID = parks.Max(park => park.GetID()) + 1;
+            }
+            nextManufacturerID = 1;
+            if (manufacturers.Count > 0)
+            {
+                nextManufacturerID = manufacturers.Max(manufacturer => manufacturer.GetID()) + 1;
+            }
+            nextAttractionID = 1;
+            if (attractions.Count > 0)
+            {
+                nextAttractionID = attractions.Max(attraction => attraction.GetID()) + 1;
+            }
+            nextRideTypeID = 1;
+            if (rideTypes.Count > 0)
+            {
+                nextRideTypeID = rideTypes.Max(rideType => rideType.GetID()) + 1;
+            }
+            nextProfileID = 1;
+            if (profiles.Count > 0)
+            {
+                nextProfileID = profiles.Max(profile => profile.GetID()) + 1;
+            }
+        }
+
         // Getting Profile data
         public static Profile GetProfileByID(int id)
         {
@@ -374,51 +410,33 @@ namespace Theme_Park_Tracker
 
         static public int GetNextVisitID()
         {
-            if (visits.Count >= 1)
-            {
-                return visits.Max(visit => visit.GetID()) + 1;
-            }
-            return 1;
+            nextVisitID++;
+            return nextVisitID - 1;
         }
         static public int GetNextParkID()
         {
-            if (parks.Count  >= 1)
-            {
-                return parks.Max(park => park.GetID()) + 1;
-            }
-            return 1;
+            nextParkID++;
+            return nextParkID - 1;
         }
         static public int GetNextManufacturerID()
         {
-            if (manufacturers.Count >= 1)
-            {
-                return manufacturers.Max(manufacturer => manufacturer.GetID()) + 1;
-            }
-            return 1;
+            nextManufacturerID++;
+            return nextManufacturerID - 1;
         }
         static public int GetNextAttractionID()
         {
-            if (attractions.Count() >= 1)
-            {
-                return attractions.Max(attraction => attraction.GetID()) + 1;
-            }
-            return 1;
+            nextAttractionID++;
+            return nextAttractionID - 1;
         }
         static public int GetNextRideTypeID()
         {
-            if (rideTypes.Count() >= 1)
-            {
-                return rideTypes.Max(rideType => rideType.GetID()) + 1;
-            }
-            return 1;
+            nextRideTypeID++;
+            return nextRideTypeID - 1;
         }
         static public int GetNextProfileID()
         {
-            if (profiles.Count >= 1)
-            {
-                return profiles.Max(profile => profile.GetID()) + 1;
-            }
-            return 1;
+            nextProfileID++;
+            return nextRideTypeID - 1;
         }
 
         static public List<Attraction> GetAttractionsByType(string type)
