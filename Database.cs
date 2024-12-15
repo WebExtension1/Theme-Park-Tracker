@@ -447,5 +447,31 @@ namespace Theme_Park_Tracker
             }
             return attractions.Where(attraction => attraction.GetElements()[0] == type).ToList();
         }
+
+        static public bool WasInLastVisit(Attraction attraction)
+        {
+            visits.OrderBy(order => order.GetDate()).ToList();
+            Visit visit = null;
+            foreach (Visit visitToCheck in visits)
+            {
+                if (visitToCheck.GetPark() == attraction.GetPark()) visit = visitToCheck;
+            }
+
+            if (visit != null)
+            {
+                HashSet<Attraction> attractions = new HashSet<Attraction>();
+                attractions.EnsureCapacity(visit.GetAttractions().Count);
+                foreach (VisitAttraction visitAttraction in visit.GetAttractions())
+                {
+                    attractions.Add(visitAttraction.GetAttraction());
+                }
+
+                if (attractions.Contains(attraction))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

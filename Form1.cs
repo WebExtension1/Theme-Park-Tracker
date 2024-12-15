@@ -1564,6 +1564,45 @@ namespace Theme_Park_Tracker
                     }
                 }
             }
+
+            // Gets all Attractions in a Park
+            HashSet<Attraction> allAttractions = Database.GetAttractionByPark(park.GetID()).ToHashSet();
+
+            // Gets all Attractions in a Park that the user has visiited
+            HashSet<Attraction> visitedAttractions = new HashSet<Attraction>();
+            foreach (Visit visit in Database.profile.GetVisits())
+            {
+                if (visit.GetPark() == park)
+                {
+                    foreach (VisitAttraction visitAttraction in visit.GetAttractions())
+                    {
+                        visitedAttractions.Add(visitAttraction.GetAttraction());
+                    }
+                }
+            }
+
+            // Removes visited Attractions from all Attractions
+            HashSet<Attraction> notVisited = new HashSet<Attraction>(allAttractions);
+            notVisited.ExceptWith(visitedAttractions);
+
+            if (notVisited.Count == 0)
+            {
+                // Displays all visited message
+                ViewPanel.Controls.Add(CreateLabel("You have visited all of the rides tracked to this park", null, new Point(14, location), 10, FontStyle.Regular, null, null));
+            }
+            else
+            {
+                // Displays all visited Attractions
+                ViewPanel.Controls.Add(CreateLabel("Rides you haven't been on", null, new Point(14, location), 15, FontStyle.Bold, null, null));
+                location += 30;
+
+                foreach (Attraction attraction in notVisited)
+                {
+                    // Missing Ride
+                    ViewPanel.Controls.Add(CreateLabel($"{attraction.GetName(DateOnly.FromDateTime(DateTime.Now))}", null, new Point(14, location), 10, FontStyle.Regular, ViewRideClicked, attraction));
+                    location += 20;
+                }
+            }
         }
         public void NewPark(object sender, EventArgs e)
         {
@@ -2218,6 +2257,15 @@ namespace Theme_Park_Tracker
                     location += 20;
                 }
             }
+
+            if (Database.WasInLastVisit(attraction))
+            {
+                ViewPanel.Controls.Add(CreateLabel($"You got on this ride in your last visit", null, new Point(14, location + 30), 10, FontStyle.Regular, null, null));
+            }
+            else
+            {
+                ViewPanel.Controls.Add(CreateLabel($"You did not get on this ride in your last visit", null, new Point(14, location + 30), 10, FontStyle.Regular, null, null));
+            }
         }
         public void NewRide(object sender, EventArgs e)
         {
@@ -2596,6 +2644,7 @@ namespace Theme_Park_Tracker
             // Get Visits containing this ride
             Park park = attraction.GetPark();
             Dictionary<VisitAttraction, Visit> visitAttractions = new Dictionary<VisitAttraction, Visit>();
+
             HashSet<Visit> uniqueVisits = new HashSet<Visit>();
             foreach (Visit visit in Database.GetVisitsByParkID(park.GetID()))
             {
