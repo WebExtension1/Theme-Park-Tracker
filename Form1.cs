@@ -2665,11 +2665,13 @@ namespace Theme_Park_Tracker
                 // Deletes the Attraction and removes it from any Visits
                 Database.attractions.Remove(attraction);
                 park.RemoveAttraction(attraction);
+
                 foreach (KeyValuePair<VisitAttraction, Visit> entry in visitAttractions)
                 {
                     Visit visit = (Visit)entry.Value;
                     visit.RemoveVisitAttraction((VisitAttraction)entry.Key);
                 }
+
             }
 
             // Loads al Rides once removed

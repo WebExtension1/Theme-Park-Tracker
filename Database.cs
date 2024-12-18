@@ -465,6 +465,7 @@ namespace Theme_Park_Tracker
                 {
                     attractions.Add(visitAttraction.GetAttraction());
                 }
+                attractions.TrimExcess();
 
                 if (attractions.Contains(attraction))
                 {
